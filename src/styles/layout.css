@@ -101,16 +101,69 @@ body {
   min-height: 0;
 }
 
-@media (max-width: 1100px) {
-  .workspace {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .side {
-    position: static;
+/* Contenedor del rack y la capa de cables: se escala junto con zoom CSS (ver ui/viewport.ts) */
+.rack-zoom { position: relative; }
+
+/* El botón de cerrar el panel solo existe en modo compacto */
+.side-close { display: none; }
+
+/* ---------- Modo compacto (laptops, p. ej. 1366×768) ----------
+   El rack ocupa todo el ancho; el panel lateral se abre por encima como un cajón;
+   la cabecera, las pestañas y el catálogo se compactan; el rack usa todo el alto restante. */
+@media (max-width: 1599px) {
+  .app { gap: 8px; padding-block: 10px 12px; }
+  .app-header { gap: 8px 16px; align-items: center; }
+  .brand h1 { font-size: 1.3rem; }
+  .brand p { font-size: 0.74rem; }
+  #toolbar { flex: 1 1 auto; }
+
+  .workspace,
+  .workspace.side-collapsed { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .side,
+  .workspace.side-collapsed .side {
+    display: flex;
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: min(420px, calc(100vw - 24px));
     max-height: none;
+    z-index: 40;
+    box-shadow: 0 12px 40px rgb(16 24 40 / 0.28);
+    transform: translateX(calc(100% + 24px));
+    visibility: hidden;
+    transition: transform 0.18s ease, visibility 0s linear 0.18s;
   }
+  .workspace.drawer-open .side {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.18s ease;
+  }
+  .side-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 40px;
+    border: 0;
+    background: none;
+    font-size: 1.3rem;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .side-close:hover { color: var(--fg); }
+
+  /* Pestañas de SG y catálogo comparten fila cuando caben */
+  .stage-wrap { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  #view-tabs { flex: 1 1 auto; min-width: 0; }
+  #catalog { flex: 0 1 auto; min-width: 0; }
+  .stage-wrap > .stage, .stage-wrap > .legend { flex-basis: 100%; }
+
+  /* El rack ocupa el alto que queda en la pantalla */
   .stage {
-    max-height: 72vh;
+    max-height: none;
+    height: calc(100vh - var(--stage-top, 220px) - 40px);
+    min-height: 340px;
   }
 }
 

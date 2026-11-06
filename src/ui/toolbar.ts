@@ -19,6 +19,11 @@ export function renderToolbar(ctx: Ctx) {
           class: `cable-chip k-${c.kind} ${ctx.ui.state.activeCable === c.id ? 'on' : ''}`,
           onclick: () => ctx.ui.set({ activeCable: c.id }),
         }, c.label))),
+      // En pantallas angostas los botones de cable se cambian por este selector (ver CSS)
+      h('select', {
+        class: 'cable-select', 'aria-label': 'Tipo de cable',
+        onchange: (e: Event) => ctx.ui.set({ activeCable: (e.target as HTMLSelectElement).value }),
+      }, CABLES.map((c) => h('option', { value: c.id, selected: ctx.ui.state.activeCable === c.id }, c.label))),
     ),
     h('div', { class: 'tool-group' },
       h('label', { class: 'tool-label', for: 'scenario' }, 'Escenario'),
@@ -38,7 +43,7 @@ export function renderToolbar(ctx: Ctx) {
       h('span', { class: 'stat' }, h('b', {}, `${usage[2].downlinkFree}/${usage[2].downlinkTotal}`), ' MHO2'),
       h('button', {
         type: 'button', class: `stat-btn ${counts.error ? 'bad' : counts.warning ? 'meh' : 'good'}`,
-        onclick: () => ctx.ui.set({ tab: 'issues' }),
+        onclick: () => ctx.ui.set({ tab: 'issues', drawer: true }),
       }, counts.error ? `${counts.error} errores` : counts.warning ? `${counts.warning} avisos` : 'Todo correcto'),
     ),
   );

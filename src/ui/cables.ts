@@ -77,12 +77,19 @@ export function drawCables(ctx: Ctx, stage: HTMLElement, layer: SVGSVGElement) {
   const rack: HTMLElement = found;
   const u = ctx.ui.state;
 
+  // El rack y la capa de cables van dentro de .rack-zoom, que puede tener zoom CSS. Las medidas
+  // del navegador llegan ya escaladas: se pasan a las coordenadas propias del contenedor.
+  const wrap = rack.parentElement ?? stage;
+  const wr = wrap.getBoundingClientRect();
+  const zoom = wrap.offsetWidth ? wr.width / wrap.offsetWidth : 1;
   const box = (el: Element) => {
-    const sr = stage.getBoundingClientRect();
+    const o = wrap.getBoundingClientRect();
     const r = el.getBoundingClientRect();
-    const left = r.left - sr.left + stage.scrollLeft;
-    const top = r.top - sr.top + stage.scrollTop;
-    return { left, top, right: left + r.width, bottom: top + r.height, cx: left + r.width / 2, cy: top + r.height / 2 };
+    const left = (r.left - o.left) / zoom;
+    const top = (r.top - o.top) / zoom;
+    const w = r.width / zoom;
+    const hh = r.height / zoom;
+    return { left, top, right: left + w, bottom: top + hh, cx: left + w / 2, cy: top + hh / 2 };
   };
   const find = (ep: string) => stage.querySelector<HTMLElement>(`[data-ep="${CSS.escape(ep)}"]`);
   const unitOf = (el: HTMLElement) => Number(el.closest<HTMLElement>('.u')?.dataset.u ?? -1);
@@ -197,8 +204,8 @@ export function drawCables(ctx: Ctx, stage: HTMLElement, layer: SVGSVGElement) {
     return { ch, l: seg ? plan.chanLane.get(seg) ?? 0 : 0 };
   };
 
-  layer.setAttribute('width', String(stage.scrollWidth));
-  layer.setAttribute('height', String(stage.scrollHeight));
+  layer.setAttribute('width', String(Math.max(wrap.scrollWidth, rack.offsetWidth)));
+  layer.setAttribute('height', String(Math.max(wrap.scrollHeight, rack.offsetHeight)));
 
   const focusIds = new Set<string>();
   if (u.selected?.kind === 'cable') focusIds.add(u.selected.id);
@@ -242,8 +249,8 @@ export function drawCables(ctx: Ctx, stage: HTMLElement, layer: SVGSVGElement) {
     // Un clic selecciona el cable; otro clic sobre el mismo lo deselecciona.
     // Si ya brilla (seleccionado directamente o por uno de sus puertos), el clic lo apaga.
     g.addEventListener('click', () => ctx.ui.set(selected || focusIds.has(c.id)
-      ? { selected: null, pending: null }
-      : { selected: { kind: 'cable', id: c.id }, tab: 'inspector', pending: null }));
+      ? { selected: null, pending: null, drawer: false }
+      : { selected: { kind: 'cable', id: c.id }, tab: 'inspector', pending: null, drawer: true }));
     if (focusIds.has(c.id)) selectedG = g;
     else layer.appendChild(g);
   }

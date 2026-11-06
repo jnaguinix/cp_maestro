@@ -69,7 +69,8 @@ select {
   display: flex;
   flex-direction: column;
   padding: 8px var(--mr, 18px) 0 var(--ml, 18px);
-  min-width: calc(1180px + var(--ml, 18px) + var(--mr, 18px));
+  /* 1260 px: lo que necesita el panel del MHO (sus 56 puertos) para no salirse de su unidad */
+  min-width: calc(1260px + var(--ml, 18px) + var(--mr, 18px));
 }
 .rack.drop-ok { outline: 2px dashed var(--accent); outline-offset: -2px; border-radius: var(--r-md); }
 .mgr {
@@ -606,3 +607,38 @@ button.issue { cursor: pointer; }
 .sw-zone.z-data .glabel { color: var(--t-up); border-bottom-color: color-mix(in srgb, var(--t-up) 45%, transparent); }
 .switch .sw-ports { gap: 4px; }
 .switch .sport { width: 30px; height: 24px; min-width: 0; padding: 0; border-radius: 4px; }
+
+/* ---------- Tamaño del rack (− / % / + / Ajustar) ---------- */
+.zoom-ctl {
+  display: inline-flex; align-items: center; gap: 2px;
+  border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); padding: 2px;
+}
+.zoom-btn, .zoom-fit {
+  border: 0; background: none; cursor: pointer; border-radius: 3px; font-size: 0.82rem; color: var(--fg);
+}
+.zoom-btn { width: 24px; height: 24px; font-size: 1rem; line-height: 1; }
+.zoom-btn:hover, .zoom-fit:hover { background: var(--surface-2); }
+.zoom-btn:disabled { opacity: 0.35; cursor: default; }
+.zoom-val { min-width: 42px; text-align: center; font-size: 0.78rem; font-variant-numeric: tabular-nums; color: var(--muted); }
+.zoom-fit { padding: 3px 8px; font-weight: 600; font-size: 0.76rem; color: var(--muted); }
+.zoom-fit.on { color: var(--accent); }
+
+/* Selector de cable: solo en pantallas angostas (sustituye a los botones) */
+.cable-select { display: none; }
+
+@media (max-width: 1599px) {
+  .cable-chips { display: none; }
+  .cable-select { display: inline-block; }
+  .toolbar { gap: 8px 14px; }
+  .stats { gap: 8px; }
+  .stat { font-size: 0.74rem; }
+  .view-hint { display: none; }
+  .view-tab { padding: 4px 10px; font-size: 0.8rem; }
+  .catalog { gap: 10px; padding: 4px 8px; }
+  .catalog-head .note, .catalog-count, .thumb-sub { display: none; }
+  .thumb { padding: 3px 8px 3px 4px; grid-template-areas: 'face name'; }
+  .thumb-face { width: 50px; height: 18px; }
+  .legend .lg-note { display: none; }
+  .side .tab { padding: 10px 8px; font-size: 0.8rem; }
+  .legend { font-size: 0.74rem; }
+}

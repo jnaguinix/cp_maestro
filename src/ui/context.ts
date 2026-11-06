@@ -12,6 +12,8 @@ export interface Ctx {
   cableSeverity: Map<string, Issue['severity']>;
   /** Extremos del cable seleccionado: se dibujan con brillo neón */
   glow: Set<EndpointId>;
+  /** Escala con la que se ve el rack ahora (1 = 100 %) */
+  zoom: number;
   /** Acción común: clic en un extremo (cablear o inspeccionar) */
   clickEndpoint: (ep: EndpointId) => void;
 }

@@ -1,5 +1,6 @@
 // Estado de la interfaz (selección, cable activo, pestaña). No se persiste.
 import type { Appliance, EndpointId } from '../model/types';
+import { loadZoomPref, type ZoomPref } from './viewport';
 
 export type Tab = 'inspector' | 'issues' | 'sgs' | 'commands';
 
@@ -15,7 +16,9 @@ export const viewSg = (view: View): number | null => (typeof view === 'number' ?
 export interface UiState {
   view: View;
   sideCollapsed: boolean;
-  projectOpen: boolean;               // menú Proyecto desplegado
+  projectOpen: boolean;
+  drawer: boolean;                    // modo compacto: panel lateral abierto encima del rack
+  zoomPref: ZoomPref;                 // escala del rack: 'fit' o un número fijo               // menú Proyecto desplegado
   importWarnings: string[];           // ajustes hechos al abrir el último proyecto             // panel lateral plegado para dar más ancho al rack
   activeCable: string;
   pending: EndpointId | null;          // primer extremo elegido al cablear
@@ -33,6 +36,8 @@ export class Ui {
     view: 'all',
     sideCollapsed: false,
     projectOpen: false,
+    drawer: false,
+    zoomPref: loadZoomPref(),
     importWarnings: [],
     activeCable: 'dac25',
     pending: null,

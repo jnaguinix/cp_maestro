@@ -3,6 +3,7 @@ import { APPLIANCE_MODELS } from '../data/appliances';
 import type { Ctx } from './context';
 import { h } from './dom';
 import { inView, viewSg, type View } from './uiState';
+import { ZOOM_MAX, ZOOM_MIN, isCompact, saveZoomPref, stepZoom, type ZoomPref } from './viewport';
 
 const DRAG_MIME = 'text/plain';
 const DRAG_PREFIX = 'maestro-model:';
@@ -35,6 +36,22 @@ export function acceptModelDrop(el: HTMLElement, onModel: (model: string) => voi
   });
 }
 
+/** Tamaño del rack: − / porcentaje / + y "Ajustar" (cabe a lo ancho). */
+function zoomControl(ctx: Ctx) {
+  const pref = ctx.ui.state.zoomPref;
+  const set = (p: ZoomPref) => { saveZoomPref(p); ctx.ui.set({ zoomPref: p }); };
+  const pct = Math.round(ctx.zoom * 100);
+  return h('div', { class: 'zoom-ctl', role: 'group', 'aria-label': 'Tamaño del rack' },
+    h('button', { type: 'button', class: 'zoom-btn', title: 'Más pequeño', 'aria-label': 'Reducir el rack', disabled: ctx.zoom <= ZOOM_MIN, onclick: () => set(stepZoom(ctx.zoom, -1)) }, '−'),
+    h('span', { class: 'zoom-val', 'aria-live': 'polite' }, `${pct}%`),
+    h('button', { type: 'button', class: 'zoom-btn', title: 'Más grande', 'aria-label': 'Ampliar el rack', disabled: ctx.zoom >= ZOOM_MAX, onclick: () => set(stepZoom(ctx.zoom, 1)) }, '+'),
+    h('button', {
+      type: 'button', class: `zoom-fit ${pref === 'fit' ? 'on' : ''}`, 'aria-pressed': String(pref === 'fit'),
+      title: 'Ajustar el rack al ancho de la pantalla (máximo 100 %)', onclick: () => set('fit'),
+    }, 'Ajustar'),
+  );
+}
+
 export function renderViewTabs(ctx: Ctx) {
   const { sim } = ctx;
   const view = ctx.ui.state.view;
@@ -64,10 +81,17 @@ export function renderViewTabs(ctx: Ctx) {
     h('span', { class: 'view-hint' }, view === 'all'
       ? 'Vista general'
       : 'Los puertos del MHO que usan otros SG se ven atenuados'),
-    h('button', {
-      type: 'button', class: 'side-toggle', 'aria-pressed': String(ctx.ui.state.sideCollapsed),
-      onclick: () => ctx.ui.set({ sideCollapsed: !ctx.ui.state.sideCollapsed }),
-    }, ctx.ui.state.sideCollapsed ? 'Mostrar panel' : 'Ocultar panel'),
+    zoomControl(ctx),
+    isCompact()
+      // Pantalla angosta: el panel es un cajón que se abre por encima del rack
+      ? h('button', {
+        type: 'button', class: 'side-toggle', 'aria-pressed': String(ctx.ui.state.drawer),
+        onclick: () => ctx.ui.set({ drawer: !ctx.ui.state.drawer }),
+      }, ctx.ui.state.drawer ? 'Cerrar panel' : 'Abrir panel')
+      : h('button', {
+        type: 'button', class: 'side-toggle', 'aria-pressed': String(ctx.ui.state.sideCollapsed),
+        onclick: () => ctx.ui.set({ sideCollapsed: !ctx.ui.state.sideCollapsed }),
+      }, ctx.ui.state.sideCollapsed ? 'Mostrar panel' : 'Ocultar panel'),
   );
   return nav;
 }

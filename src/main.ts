@@ -15,6 +15,7 @@ import { renderInspector } from './ui/inspector';
 import { renderCommands, renderIssues, renderSgs } from './ui/panels';
 import { renderToolbar } from './ui/toolbar';
 import { Ui, type Tab } from './ui/uiState';
+import { fitZoom } from './ui/viewport';
 
 const store = new Store();
 const ui = new Ui();
@@ -50,11 +51,14 @@ function clickEndpoint(ep: EndpointId) {
     // dos extremos) lo deselecciona.
     const litCableId = sel?.kind === 'cable' ? sel.id : sel?.kind === 'endpoint' ? store.cableAt(sel.id)?.id : undefined;
     if (busy && litCableId === busy.id) {
-      ui.set({ selected: null });
+      ui.set({ selected: null, drawer: false });
       return;
     }
-    // Un puerto libre empieza un cable; uno ocupado se inspecciona.
-    ui.set({ selected: { kind: 'endpoint', id: ep }, tab: 'inspector', pending: busy ? null : ep, highlight: new Set(), highlightCables: new Set() });
+    // Un puerto libre empieza un cable; uno ocupado se inspecciona (en modo compacto abre el panel).
+    ui.set({
+      selected: { kind: 'endpoint', id: ep }, tab: 'inspector', pending: busy ? null : ep,
+      highlight: new Set(), highlightCables: new Set(), drawer: !!busy,
+    });
     return;
   }
   if (pending === ep) {
@@ -78,6 +82,7 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 let layer: SVGSVGElement;
+let refitting = false;
 
 function render() {
   const sim = store.get();
@@ -89,7 +94,7 @@ function render() {
     ? sim.cables.find((c) => c.id === sel.id)
     : sel?.kind === 'endpoint' ? sim.cables.find((c) => c.a === sel.id || c.b === sel.id) : undefined;
   const glow = new Set<EndpointId>(selCable ? [selCable.a, selCable.b] : []);
-  const ctx: Ctx = { store, ui, sim, issues, epSeverity: maps.ep, cableSeverity: maps.cab, glow, clickEndpoint };
+  const ctx: Ctx = { store, ui, sim, issues, epSeverity: maps.ep, cableSeverity: maps.cab, glow, zoom: 1, clickEndpoint };
 
   // El menú Proyecto guarda mientras escribes: se conserva el foco y el cursor al redibujar
   const focused = document.activeElement as HTMLInputElement | HTMLTextAreaElement | null;
@@ -104,15 +109,26 @@ function render() {
   }
 
   const scrollLeft = stage.scrollLeft;
+  const scrollTop = stage.scrollTop;
+  workspace.classList.toggle('side-collapsed', ui.state.sideCollapsed);
+  workspace.classList.toggle('drawer-open', ui.state.drawer);
   clear(stage);
   layer = svg('svg', { class: 'cable-layer', 'aria-hidden': 'true' }) as SVGSVGElement;
-  stage.append(renderRack(ctx), layer);
-  workspace.classList.toggle('side-collapsed', ui.state.sideCollapsed);
+  // El rack y la capa de cables comparten un contenedor que se escala junto (zoom CSS)
+  const rackEl = renderRack(ctx);
+  const zoomWrap = h('div', { class: 'rack-zoom' }, rackEl, layer);
+  stage.append(zoomWrap);
+  const z = ui.state.zoomPref === 'fit' ? fitZoom(stage, rackEl) : ui.state.zoomPref;
+  zoomWrap.style.zoom = z === 1 ? '' : String(z);
+  ctx.zoom = z;
+  // Alto disponible para el rack (lo usa el CSS del modo compacto)
+  document.documentElement.style.setProperty('--stage-top', `${Math.round(stage.getBoundingClientRect().top + window.scrollY)}px`);
   clear(viewTabsHost);
   viewTabsHost.appendChild(renderViewTabs(ctx));
   clear(catalogHost);
   catalogHost.appendChild(renderCatalog(ctx));
   stage.scrollLeft = scrollLeft;
+  stage.scrollTop = scrollTop;
   stage.classList.toggle('is-pending', !!ui.state.pending);
 
   const errCount = issues.filter((i) => i.severity === 'error').length;
@@ -120,7 +136,9 @@ function render() {
   sideTabs.append(...TABS.map((t) => h('button', {
     type: 'button', role: 'tab', 'aria-selected': String(ui.state.tab === t.id),
     class: `tab ${ui.state.tab === t.id ? 'on' : ''}`, onclick: () => ui.set({ tab: t.id }),
-  }, t.label, t.id === 'issues' && errCount ? h('span', { class: 'badge' }, errCount) : null)));
+  }, t.label, t.id === 'issues' && errCount ? h('span', { class: 'badge' }, errCount) : null)),
+  // Solo se ve en modo compacto, donde el panel es un cajón
+  h('button', { type: 'button', class: 'side-close', 'aria-label': 'Cerrar panel', title: 'Cerrar panel (Esc)', onclick: () => ui.set({ drawer: false }) }, '×'));
 
   const sideScroll = sideBody.scrollTop;
   clear(sideBody);
@@ -135,7 +153,19 @@ function render() {
   toastHost.hidden = !ui.state.toast;
   toastHost.textContent = ui.state.toast ?? '';
 
-  requestAnimationFrame(() => drawCables(ctx, stage, layer));
+  requestAnimationFrame(() => {
+    drawCables(ctx, stage, layer);
+    // Los organizadores laterales toman su ancho al dibujar los cables: si con "Ajustar" eso cambia
+    // la escala que cabe, se vuelve a dibujar una vez con la escala correcta.
+    if (ui.state.zoomPref === 'fit' && !refitting) {
+      const z2 = fitZoom(stage, rackEl);
+      if (Math.abs(z2 - z) >= 0.01) {
+        refitting = true;
+        render();
+        refitting = false;
+      }
+    }
+  });
   lastCtx = ctx;
 }
 
@@ -144,7 +174,12 @@ const redrawCables = () => { if (lastCtx) drawCables(lastCtx, stage, layer); };
 
 store.subscribe(render);
 ui.subscribe(render);
-window.addEventListener('resize', redrawCables);
+// Al cambiar el tamaño de la ventana (o el zoom del navegador) se recalcula la escala del rack
+let resizeTimer: number | undefined;
+window.addEventListener('resize', () => {
+  window.clearTimeout(resizeTimer);
+  resizeTimer = window.setTimeout(render, 80);
+});
 document.fonts?.ready.then(redrawCables);
 document.addEventListener('click', (e) => {
   if (ui.state.projectOpen && !(e.target as Element).closest?.('.project-menu')) ui.set({ projectOpen: false });
@@ -153,7 +188,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && ui.state.projectOpen) { ui.set({ projectOpen: false }); return; }
   if (e.key === 'Escape') {
     const sel = ui.state.selected;
-    ui.set({ pending: null, highlight: new Set(), highlightCables: new Set(), selected: sel?.kind === 'cable' ? null : sel });
+    ui.set({ pending: null, highlight: new Set(), highlightCables: new Set(), selected: sel?.kind === 'cable' ? null : sel, drawer: false });
   }
 });
 
