@@ -16,6 +16,7 @@ import { renderCommands, renderIssues, renderSgs } from './ui/panels';
 import { renderToolbar } from './ui/toolbar';
 import { Ui, type Tab } from './ui/uiState';
 import { fitZoom } from './ui/viewport';
+import { maybeStartTour } from './ui/tour';
 
 const store = new Store();
 const ui = new Ui();
@@ -199,3 +200,5 @@ document.addEventListener('keydown', (e) => {
 });
 
 render();
+// La primera vez que alguien abre la app, se muestra el recorrido guiado
+maybeStartTour();

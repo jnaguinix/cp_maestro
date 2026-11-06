@@ -3,6 +3,7 @@ import { portUsage } from '../rules/validate';
 import type { Ctx } from './context';
 import { h } from './dom';
 import { renderProjectMenu } from './projectMenu';
+import { startTour } from './tour';
 
 export function renderToolbar(ctx: Ctx) {
   const usage = portUsage(ctx.sim);
@@ -23,6 +24,10 @@ export function renderToolbar(ctx: Ctx) {
         title: 'Ver la validación',
         onclick: () => ctx.ui.set({ tab: 'issues', drawer: true }),
       }, counts.error ? `${counts.error} errores` : counts.warning ? `${counts.warning} avisos` : '✓ Todo correcto'),
+      h('button', {
+        type: 'button', class: 'guide-btn', title: 'Recorrido guiado por la app',
+        onclick: () => { ctx.ui.set({ projectOpen: false, cableOpen: false, addOpen: false }); startTour(); },
+      }, '? Guía'),
     ),
   );
 }
