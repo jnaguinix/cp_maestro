@@ -322,9 +322,11 @@ export function validate(state: SimState): Issue[] {
 
   // ---------- Reglas por Security Group ----------
   const mgmtUse = new Map<string, number[]>();
+  const uplinkUse = new Map<string, number[]>();
   for (const sg of state.sgs) {
     const members = state.appliances.filter((a) => a.sg === sg.id);
     for (const p of sg.mgmtPorts) mgmtUse.set(p, [...(mgmtUse.get(p) ?? []), sg.id]);
+    for (const p of sg.uplinkPorts) uplinkUse.set(p, [...(uplinkUse.get(p) ?? []), sg.id]);
 
     const models = new Set(members.map((m) => m.model));
     if (models.size > 1) {
@@ -351,11 +353,11 @@ export function validate(state: SimState): Issue[] {
     }
 
     if (members.length === 0) {
-      if (sg.mgmtPorts.length) {
+      if (sg.mgmtPorts.length || sg.uplinkPorts.length) {
         add({
           rule: 'SG-EMPTY', severity: 'info',
           title: `SG${sg.id} no tiene appliances`,
-          detail: 'El Security Group existe y tiene management, pero sin miembros no procesa tráfico.',
+          detail: 'El Security Group existe y tiene puertos asignados, pero sin miembros no procesa tráfico.',
           source: 'AG p.39-40', refs: [],
         });
       }
@@ -392,6 +394,60 @@ export function validate(state: SimState): Issue[] {
           });
         }
       }
+    }
+
+    // Uplinks: la salida del SG hacia la red del cliente
+    if (sg.uplinkPorts.length === 0) {
+      add({
+        rule: 'SG-NO-UPLINK', severity: 'error',
+        title: `SG${sg.id} no tiene Uplinks asignados`,
+        detail: 'Sin un puerto Uplink del Orchestrator asignado, el Security Group no tiene interfaces de datos hacia la red del cliente y no puede pasar tráfico de producción. Asigna al menos uno de cada MHO (desde el panel del SG o desde el detalle del puerto).',
+        source: 'GSG p.126; AG (add maestro security-group … interface)', refs: [],
+      });
+    } else {
+      const orchs = new Set(sg.uplinkPorts.map((p) => p.split('/')[0]));
+      if (orchs.size === 1) {
+        add({
+          rule: 'SG-UPLINK-ONE-MHO', severity: 'warning',
+          title: `SG${sg.id}: Uplinks solo en el MHO${[...orchs][0]}`,
+          detail: 'Si cae ese Orchestrator, el SG se queda sin salida a la red del cliente. Asigna también el puerto equivalente del otro MHO (por ejemplo eth1-13 y eth2-13); dentro del SG puedes dejarlos sueltos, en bond o con VLANs.',
+          source: 'GSG p.126 [INF para Uplinks]', refs: sg.uplinkPorts.map((p) => `mho:${p}`),
+        });
+      }
+      for (const p of sg.uplinkPorts) {
+        const [o, f] = p.split('/').map(Number);
+        const cfg = state.ports[portKey(o as OrchId, f)];
+        if (!cfg || cfg.type !== 'uplink') {
+          add({
+            rule: 'SG-UPLINK-TYPE', severity: 'error',
+            title: `SG${sg.id}: el puerto ${p} asignado como Uplink es de tipo ${cfg?.type ?? 'desconocido'}`,
+            detail: 'Solo los puertos de tipo Uplink se asignan a un SG como interfaces de datos. Cambia el tipo con set maestro port <ID> type uplink o asigna otro puerto.',
+            source: 'GSG p.46; AG p.85', refs: [`mho:${p}`],
+          });
+          continue;
+        }
+        const c = state.cables.find((k) => k.a === `mho:${p}` || k.b === `mho:${p}`);
+        const otherEnd = c ? (c.a === `mho:${p}` ? c.b : c.a) : null;
+        if (!otherEnd?.startsWith('sw:datasw')) {
+          add({
+            rule: 'SG-UPLINK-NOCABLE', severity: 'warning',
+            title: `SG${sg.id}: el Uplink ${p} no llega a la red del cliente`,
+            detail: 'El puerto está asignado al SG pero no tiene un cable hacia el switch del cliente (producción), así que esa interfaz no tendrá enlace.',
+            source: 'GSG p.126', refs: [`mho:${p}`],
+          });
+        }
+      }
+    }
+  }
+
+  for (const [port, sgIds] of uplinkUse) {
+    if (sgIds.length > 1) {
+      add({
+        rule: 'UPLINK-SHARED', severity: 'warning',
+        title: `Uplink ${port} asignado a varios SGs (SG${sgIds.join(', SG')})`,
+        detail: 'A diferencia del Management, lo normal es que cada Uplink pertenezca a un solo Security Group. Si de verdad lo compartes, separa el tráfico de cada SG con VLANs distintas en ese puerto. [INF: revisa la versión y la guía antes de hacerlo]',
+        source: 'AG (asignación de interfaces a SGs) [INF]', refs: [`mho:${port}`],
+      });
     }
   }
 

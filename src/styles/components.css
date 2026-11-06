@@ -531,3 +531,42 @@ button.issue { cursor: pointer; }
 /* El rack es una superficie de trabajo: arrastrar el ratón no debe seleccionar texto */
 .stage, .view-tabs, .catalog, .toolbar { user-select: none; -webkit-user-select: none; }
 .stage select, .stage input { user-select: auto; -webkit-user-select: auto; }
+
+/* ---------- Uplinks asignados a Security Groups ---------- */
+/* Barra inferior del color del SG en los puertos Uplink asignados */
+.port.asg::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  bottom: 2px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--sgc);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.5);
+}
+.port.asg-multi::after { background: repeating-linear-gradient(90deg, var(--sgc) 0 4px, #fff 4px 6px); }
+.port.dim { opacity: 0.4; }
+.uplink-box { display: flex; flex-direction: column; gap: 6px; }
+.up-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--surface-2); border: 1px solid var(--line); border-left: 4px solid var(--t-up); font-weight: 500; }
+.up-chip code { font-weight: 600; }
+.chip-x { border: 0; background: none; cursor: pointer; color: var(--muted); font-size: 0.9rem; padding: 0 2px; line-height: 1; }
+.chip-x:hover { color: var(--err); }
+.uplink-pick { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.uplink-pick .sg-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--sgc); display: inline-block; }
+
+/* ---------- Números de puerto legibles ---------- */
+/* IBM Plex Mono a ~9 px dibuja el 5 casi igual que el 6 (15 parecía 16).
+   Los números pequeños usan la fuente de texto, con cifras tabulares y algo más de tamaño. */
+.slot .pnum,
+.sport,
+.port.mini,
+.deco-port {
+  font-family: var(--font-body);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.slot .pnum { font-size: 0.68rem; line-height: 1.05; }
+.sport { font-size: 0.7rem; }
+.port.mini { font-size: 0.68rem; }

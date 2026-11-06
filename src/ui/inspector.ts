@@ -53,6 +53,19 @@ function kv(k: string, v: Node | string) {
   return h('div', { class: 'kv' }, h('dt', {}, k), h('dd', {}, v));
 }
 
+/** Casillas para asignar este Uplink a uno o varios Security Groups. */
+function uplinkAssign(ctx: Ctx, pid: string) {
+  return h('fieldset', { class: 'mgmt-pick uplink-pick' },
+    h('legend', {}, 'Asignar este Uplink al Security Group'),
+    ctx.sim.sgs.map((sg) => {
+      const id = `up-${sg.id}-${pid.replace(/\//g, '-')}`;
+      return h('label', { for: id, class: `check sg-${sg.id}` },
+        h('input', { type: 'checkbox', id, checked: sg.uplinkPorts.includes(pid), onchange: () => ctx.store.toggleSgUplink(sg.id, pid) }),
+        h('span', { class: 'sg-dot' }), `SG${sg.id}`);
+    }),
+  );
+}
+
 function mhoInspector(ctx: Ctx, ep: EndpointId) {
   const p = parseEndpoint(ep);
   if (p.kind !== 'mho') return h('div');
@@ -109,6 +122,7 @@ function mhoInspector(ctx: Ctx, ep: EndpointId) {
       : p.front <= 4 ? 'Solo los puertos 1-4 admiten el tipo management, y este simulador no los cambia a otro tipo.'
         : 'Puerto de sync Dual Site. El simulador no permite cambiarle el tipo.') : null,
     sgs.length ? h('p', { class: 'note' }, `Asignado como Management a: ${sgs.join(', ')}${sgs.length > 1 ? ' (Shared Management)' : ''}`) : null,
+    cfg.type === 'uplink' && !disabled ? uplinkAssign(ctx, pid) : null,
     h('h3', {}, 'Cable'), cableBlock(ctx, cable, ep),
     h('h3', {}, 'Comandos (MHO, Gaia Clish)'), h('pre', { class: 'cmd' }, cmds.join('\n')),
     h('h3', {}, 'Validación'), issuesFor(ctx, (i) => i.refs.includes(ep) || (!!cable && !!i.cables?.includes(cable.id))),

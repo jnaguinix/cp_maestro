@@ -90,6 +90,8 @@ export interface SecurityGroup {
   id: number;
   /** puertos de management asignados, como Port ID "1/1/1" */
   mgmtPorts: string[];
+  /** puertos Uplink asignados (red del cliente), como Port ID "1/13/1" */
+  uplinkPorts: string[];
 }
 
 export interface SimState {

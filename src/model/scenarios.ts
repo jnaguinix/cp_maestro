@@ -41,7 +41,7 @@ export function buildScenario(id: ScenarioId): SimState {
     ports: basePorts(),
     appliances: baseAppliances(),
     switches: DEFAULT_SWITCHES.map((s) => ({ ...s })),
-    sgs: [1, 2, 3, 4].map((n) => ({ id: n, mgmtPorts: [] })),
+    sgs: [1, 2, 3, 4].map((n) => ({ id: n, mgmtPorts: [], uplinkPorts: [] })),
     cables: [],
   };
   if (id === 'empty') return state;
@@ -65,9 +65,14 @@ export function buildScenario(id: ScenarioId): SimState {
     state.cables.push(cable(appEndpoint(app.id, 'c2'), mhoEndpoint(2, port), 'dac25'));
   });
 
-  // Uplinks hacia el switch del cliente (se usan en la fase de bonds)
-  state.cables.push(cable(swEndpoint('datasw', 1), mhoEndpoint(1, 13), 'dac10'));
-  state.cables.push(cable(swEndpoint('datasw', 2), mhoEndpoint(2, 13), 'dac10'));
+  // Uplinks hacia el switch del cliente: un par por SG, el mismo puerto en ambos MHOs
+  // (SG1 -> 5, SG2 -> 6, SG3 -> 7, SG4 -> 8, los primeros Uplinks del MHO-140), para poder hacer un bond entre MHOs.
+  for (const sg of state.sgs) {
+    const port = 4 + sg.id;
+    state.cables.push(cable(swEndpoint('datasw', sg.id * 2 - 1), mhoEndpoint(1, port), 'dac10'));
+    state.cables.push(cable(swEndpoint('datasw', sg.id * 2), mhoEndpoint(2, port), 'dac10'));
+    sg.uplinkPorts = [`1/${port}/1`, `2/${port}/1`];
+  }
 
   if (id === 'broken') {
     // 1) 9800-A: el puerto 33 del MHO1 quedó a 10G con un DAC de 25G
@@ -90,6 +95,10 @@ export function buildScenario(id: ScenarioId): SimState {
     state.cables = state.cables.filter((c) => !c.a.startsWith(`${appEndpoint('a5', '')}`));
     state.cables.push(cable(appEndpoint('a5', 'c1'), mhoEndpoint(2, 31), 'dac25'));
     state.cables.push(cable(appEndpoint('a5', 'c2'), mhoEndpoint(1, 31), 'dac25'));
+    // 9) SG2 sin uplinks asignados (no tiene salida a la red del cliente)
+    state.sgs[1].uplinkPorts = [];
+    // 10) SG4 con su uplink solo en el MHO1 (sin redundancia)
+    state.sgs[3].uplinkPorts = ['1/8/1'];
     // (además falta el cable de sync interno 48 <-> 48)
   }
   return state;

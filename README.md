@@ -60,6 +60,9 @@ scripts/       to-artifact.mjs (post-proceso del build de un solo archivo)
 | SG-MIXED | Un SG solo con appliances del mismo modelo | AG p.74 |
 | SG-NO-MGMT / SG-MGMT-ONE-MHO / SG-MGMT-NOCABLE | Management asignado, en ambos MHOs y cableado | CB p.30, p.54; GSG p.126, p.128 |
 | MGMT-SHARED | Shared Management (info) | GSG p.128 |
+| SG-NO-UPLINK | Cada SG con miembros tiene al menos un Uplink asignado | GSG p.126; AG |
+| SG-UPLINK-ONE-MHO / SG-UPLINK-NOCABLE / SG-UPLINK-TYPE | Uplinks en ambos MHOs, cableados al switch del cliente y de tipo Uplink | GSG p.126, p.46 [INF en parte] |
+| UPLINK-SHARED | Un Uplink asignado a varios SGs (aviso) | [INF] |
 | SW-ON-DOWNLINK / PROD-ON-MGMT | Switches en puertos equivocados | GSG p.126; CB p.173 |
 
 ## Supuestos marcados como [INF]

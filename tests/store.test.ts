@@ -26,4 +26,12 @@ describe('Store: agregar y quitar appliances', () => {
     expect(store.get().appliances.some((a) => a.id === target.id)).toBe(false);
     expect(store.get().cables.length).toBe(before - touching);
   });
+
+  it('asigna y quita un Uplink de un SG', () => {
+    const store = new Store(buildScenario('empty'));
+    store.toggleSgUplink(1, '1/5/1');
+    expect(store.get().sgs[0].uplinkPorts).toEqual(['1/5/1']);
+    store.toggleSgUplink(1, '1/5/1');
+    expect(store.get().sgs[0].uplinkPorts).toEqual([]);
+  });
 });

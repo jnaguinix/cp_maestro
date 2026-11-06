@@ -39,13 +39,36 @@ describe('escenarios', () => {
   });
   it('el escenario con errores detecta cada fallo plantado', () => {
     const r = rules(buildScenario('broken'));
-    for (const rule of ['SPEED-MISMATCH', 'DL-SYM-APP', 'APP-PORT-SLOW', 'SG-NO-MGMT', 'SG-MGMT-ONE-MHO', 'APP-NOT-DOWNLINK', 'SG-MIXED', 'SYNC-MISSING', 'DL-SYM-SG', 'DL-PORT-PARITY']) {
+    for (const rule of ['SPEED-MISMATCH', 'DL-SYM-APP', 'APP-PORT-SLOW', 'SG-NO-MGMT', 'SG-MGMT-ONE-MHO', 'APP-NOT-DOWNLINK', 'SG-MIXED', 'SYNC-MISSING', 'DL-SYM-SG', 'DL-PORT-PARITY', 'SG-NO-UPLINK', 'SG-UPLINK-ONE-MHO']) {
       expect(r, rule).toContain(rule);
     }
   });
   it('sin cables, cada appliance asignado reporta APP-NO-DL', () => {
     const s = buildScenario('empty');
     expect(errors(s).filter((i) => i.rule === 'APP-NO-DL')).toHaveLength(8);
+  });
+});
+
+describe('uplinks por Security Group', () => {
+  it('cada SG con miembros necesita al menos un Uplink', () => {
+    const s = buildScenario('ok');
+    s.sgs[0].uplinkPorts = [];
+    expect(errors(s).map((i) => i.rule)).toContain('SG-NO-UPLINK');
+  });
+  it('un Uplink sin cable al switch del cliente da aviso', () => {
+    const s = buildScenario('ok');
+    s.sgs[0].uplinkPorts.push('1/20/1', '2/20/1');
+    expect(validate(s).filter((i) => i.rule === 'SG-UPLINK-NOCABLE')).toHaveLength(2);
+  });
+  it('asignar un puerto que no es de tipo Uplink es un error', () => {
+    const s = buildScenario('ok');
+    s.sgs[0].uplinkPorts.push('1/27/1');
+    expect(errors(s).map((i) => i.rule)).toContain('SG-UPLINK-TYPE');
+  });
+  it('un Uplink en dos SGs da aviso', () => {
+    const s = buildScenario('ok');
+    s.sgs[1].uplinkPorts.push('1/5/1');
+    expect(rules(s)).toContain('UPLINK-SHARED');
   });
 });
 

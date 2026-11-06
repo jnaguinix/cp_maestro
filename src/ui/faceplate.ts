@@ -1,7 +1,7 @@
 // Panel frontal de un MHO-140: 48 puertos SFP + 8 QSFP28.
 // Disposición: impares arriba y pares abajo [INF para 1-48]; en los QSFP28 la fila
 // de arriba (49/51/53/55) y la de abajo (50/52/54/56) están documentadas (GSG p.124).
-import { gaiaName, isSplitMode, mhoEndpoint, portDef, portKey, TYPE_LABEL } from '../data/mho140';
+import { gaiaName, isSplitMode, mhoEndpoint, portDef, portIdStr, portKey, TYPE_LABEL } from '../data/mho140';
 import { parseEndpoint } from '../model/endpoints';
 import type { Appliance, OrchId } from '../model/types';
 import type { Ctx } from './context';
@@ -29,17 +29,23 @@ function portButton(ctx: Ctx, o: OrchId, front: number, sub = 1, mini = false) {
   // En la vista de un SG, el puerto que usa un appliance de otro SG se ve atenuado
   const foreign = owner && u.view !== 'all' && !inView(u.view, owner) ? owner : null;
   const isSel = u.selected?.kind === 'endpoint' && u.selected.id === ep;
+  // Security Groups que tienen este puerto asignado como Uplink
+  const upSgs = ctx.sim.sgs.filter((sg) => sg.uplinkPorts.includes(portIdStr(o, front, sub)));
+  const upOther = typeof u.view === 'number' && upSgs.length > 0 && !upSgs.some((sg) => sg.id === u.view);
   const cls = [
     'port', `t-${cfg.type}`, mini ? 'mini' : '', def.formFactor === 'QSFP28' && !mini ? 'qsfp' : '',
     cabled ? 'cabled' : '', disabled ? 'disabled' : '', sev ? `sev-${sev}` : '',
     // conectado a un appliance: relleno del color de su SG, como el puerto del firewall
     owner ? `by-sg sg-${owner.sg ?? 'none'}` : '', foreign ? 'foreign' : '',
+    // asignado como Uplink: marca del color del SG (rayada si son varios); atenuado si es de otro SG
+    upSgs.length ? `asg ${owner ? '' : `sg-${upSgs[0].id}`} ${upSgs.length > 1 ? 'asg-multi' : ''}` : '', upOther ? 'dim' : '',
     ctx.glow.has(ep) ? 'glow' : '',
     u.pending === ep ? 'pending' : '', isSel ? 'selected' : '', u.highlight.has(ep) ? 'hl' : '',
     cfg.type !== def.defaultType || cfg.mode !== def.defaultMode ? 'changed' : '',
   ].filter(Boolean).join(' ');
   const name = gaiaName(o, front, sub, cfg);
-  const ownerTxt = owner ? ` · ${foreign ? 'ocupado por' : 'conectado a'} ${owner.name} (${owner.sg ? `SG${owner.sg}` : 'sin SG'})` : '';
+  const ownerTxt = (owner ? ` · ${foreign ? 'ocupado por' : 'conectado a'} ${owner.name} (${owner.sg ? `SG${owner.sg}` : 'sin SG'})` : '')
+    + (upSgs.length ? ` · Uplink de ${upSgs.map((sg) => `SG${sg.id}`).join(', ')}` : '');
   return h('button', {
     class: cls, type: 'button', 'data-ep': ep,
     title: `${o}/${front}/${sub} · ${name} · ${TYPE_LABEL[cfg.type]} · ${cfg.mode}${disabled ? ' · deshabilitado por breakout' : ''}${ownerTxt}`,

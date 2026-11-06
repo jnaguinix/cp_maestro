@@ -41,7 +41,10 @@ export class Store {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return null;
       const parsed = JSON.parse(raw) as SimState;
-      return parsed.version === 2 ? parsed : null;
+      if (parsed.version !== 2) return null;
+      // Estados guardados antes de que existieran los uplinks por SG
+      parsed.sgs = parsed.sgs.map((sg) => ({ ...sg, uplinkPorts: sg.uplinkPorts ?? [] }));
+      return parsed;
     } catch {
       return null;
     }
@@ -116,6 +119,18 @@ export class Store {
       ...this.state,
       appliances: this.state.appliances.filter((a) => a.id !== appId),
       cables: this.state.cables.filter((c) => !c.a.startsWith(prefix) && !c.b.startsWith(prefix)),
+    });
+  }
+
+  /** Asigna o quita un puerto Uplink del MHO a un Security Group. */
+  toggleSgUplink(sgId: number, portId: string) {
+    this.commit({
+      ...this.state,
+      sgs: this.state.sgs.map((sg) => {
+        if (sg.id !== sgId) return sg;
+        const has = sg.uplinkPorts.includes(portId);
+        return { ...sg, uplinkPorts: has ? sg.uplinkPorts.filter((p) => p !== portId) : [...sg.uplinkPorts, portId] };
+      }),
     });
   }
 
