@@ -2,8 +2,9 @@
 import { cableSpec } from '../data/appliances';
 import { isSplitMode, portDef, portKey } from '../data/mho140';
 import { parseEndpoint } from './endpoints';
+import { emptyProject } from './projectFile';
 import { buildScenario, type ScenarioId } from './scenarios';
-import type { Appliance, EndpointId, OrchId, PortMode, PortType, SimState } from './types';
+import type { Appliance, EndpointId, OrchId, PortMode, PortType, ProjectInfo, SimState } from './types';
 
 const STORAGE_KEY = 'maestro-port-sim:v2';
 
@@ -165,6 +166,16 @@ export class Store {
   }
 
   loadScenario(id: ScenarioId) {
-    this.commit(buildScenario(id));
+    // los datos del proyecto (nombre, cliente…) se conservan al cambiar de escenario
+    this.commit({ ...buildScenario(id), project: this.state.project });
+  }
+
+  /** Reemplaza toda la topología (al abrir un proyecto). El estado debe venir ya validado. */
+  replaceState(next: SimState) {
+    this.commit(next);
+  }
+
+  setProject(patch: Partial<ProjectInfo>) {
+    this.commit({ ...this.state, project: { ...emptyProject(), ...this.state.project, ...patch } });
   }
 }

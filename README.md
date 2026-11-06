@@ -4,6 +4,29 @@ Simulador de puertos y cableado para Check Point Maestro: 2× MHO-140 en un mism
 
 Conectas y desconectas cables, cambias el tipo y la velocidad de los puertos, asignas appliances y puertos Management a los Security Groups, y el validador explica qué está mal y en qué documento se apoya cada regla.
 
+## Proyectos: guardar, abrir y exportar
+
+El menú **Proyecto** (barra superior) guarda los datos del proyecto (nombre, cliente, autor, notas) junto con la topología y ofrece:
+
+| Acción | Archivo | Para qué |
+|---|---|---|
+| Guardar proyecto | `cliente-proyecto-AAAA-MM-DD.maestro.json` | Guardar o compartir el diseño y volver a abrirlo después |
+| Abrir proyecto… | `.maestro.json` (o el estado guardado "a pelo") | Retomar un diseño; se valida y lo que no encaja se descarta con un aviso |
+| Exportar foto (PNG) | `….png` (o `…-sgN.png` desde la pestaña de un SG) | Mostrar al cliente el rack conectado, con cabecera del proyecto, leyenda y resumen por SG |
+| Exportar plan de cableado (CSV) | `…-plan-cableado.csv` | Una fila por cable (origen, destino, Port ID, interfaz Gaia, cable, SG) para el instalador; separador `;` para Excel |
+
+Formato del archivo de proyecto:
+
+```json
+{
+  "format": "maestro-port-lab",
+  "fileVersion": 1,
+  "exportedAt": "2026-11-05T10:00:00.000Z",
+  "project": { "name": "", "client": "", "author": "", "notes": "" },
+  "topology": { "version": 2, "ports": {}, "appliances": [], "switches": [], "sgs": [], "cables": [] }
+}
+```
+
 ## Uso
 
 ```bash
@@ -26,6 +49,8 @@ src/
     endpoints.ts   Formato de los extremos de cable (mho:/app:/sw:)
     scenarios.ts   Escenarios precargados (correcto, con errores, vacío)
     store.ts       Estado + acciones + persistencia local
+    projectFile.ts Exportar/importar el proyecto (.maestro.json) con validación
+    cablePlan.ts   Plan de cableado (CSV)
   rules/
     validate.ts    Motor de reglas (función pura, testeado)
   ui/          Interfaz sin framework
@@ -37,8 +62,10 @@ src/
     inspector.ts   Detalle de puerto o cable
     panels.ts      Validación, Security Groups y comandos generados
     toolbar.ts     Barra superior
+    projectMenu.ts Menú Proyecto: datos, guardar/abrir, foto y CSV
+    exportImage.ts Foto PNG del rack (html-to-image) con cabecera y leyenda
   styles/      tokens.css · layout.css · components.css
-tests/         validate.test.ts
+tests/         validate.test.ts · store.test.ts · project.test.ts
 scripts/       to-artifact.mjs (post-proceso del build de un solo archivo)
 ```
 

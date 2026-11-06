@@ -570,3 +570,30 @@ button.issue { cursor: pointer; }
 .slot .pnum { font-size: 0.68rem; line-height: 1.05; }
 .sport { font-size: 0.7rem; }
 .port.mini { font-size: 0.68rem; }
+
+/* ---------- Menú Proyecto (guardar, abrir, exportar) ---------- */
+.project-menu { position: relative; }
+.proj-toggle {
+  display: inline-flex; align-items: center; gap: 4px; max-width: 260px;
+  border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-sm);
+  padding: 5px 10px; font-weight: 600; font-size: 0.82rem; cursor: pointer;
+}
+.proj-toggle .proj-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.project-menu.open .proj-toggle { border-color: var(--accent); }
+.proj-panel {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 30;
+  width: min(560px, calc(100vw - 32px));
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px;
+  padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
+  box-shadow: 0 10px 30px rgb(16 24 40 / 0.18);
+}
+.proj-fields, .proj-actions { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.proj-actions .btn { align-self: stretch; text-align: left; }
+.proj-field { display: flex; flex-direction: column; gap: 2px; font-size: 0.75rem; color: var(--muted); }
+.proj-field input, .proj-field textarea {
+  font: inherit; font-size: 0.85rem; color: var(--fg); background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: var(--r-sm); padding: 5px 8px; resize: vertical;
+  user-select: text; -webkit-user-select: text;
+}
+.proj-warnings { grid-column: 1 / -1; font-size: 0.8rem; max-height: 180px; overflow: auto; }
+@media (max-width: 640px) { .proj-panel { grid-template-columns: minmax(0, 1fr); } }

@@ -94,8 +94,18 @@ export interface SecurityGroup {
   uplinkPorts: string[];
 }
 
+/** Datos del proyecto (cliente, autor, notas). Se guardan con la topología. */
+export interface ProjectInfo {
+  name: string;
+  client: string;
+  author: string;
+  notes: string;
+}
+
 export interface SimState {
   version: 2;
+  /** Opcional: los estados guardados antes del exportador no lo tienen */
+  project?: ProjectInfo;
   ports: Record<string, MhoPortConfig>;   // clave "o/front" p.ej. "1/27"
   appliances: Appliance[];
   switches: SwitchDev[];

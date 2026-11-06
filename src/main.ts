@@ -91,8 +91,17 @@ function render() {
   const glow = new Set<EndpointId>(selCable ? [selCable.a, selCable.b] : []);
   const ctx: Ctx = { store, ui, sim, issues, epSeverity: maps.ep, cableSeverity: maps.cab, glow, clickEndpoint };
 
+  // El menú Proyecto guarda mientras escribes: se conserva el foco y el cursor al redibujar
+  const focused = document.activeElement as HTMLInputElement | HTMLTextAreaElement | null;
+  const focusId = focused && toolbarHost.contains(focused) && focused.id ? focused.id : null;
+  const caret = focusId && 'selectionStart' in focused! ? [focused!.selectionStart, focused!.selectionEnd] as const : null;
   clear(toolbarHost);
   toolbarHost.appendChild(renderToolbar(ctx));
+  if (focusId) {
+    const el = document.getElementById(focusId) as HTMLInputElement | null;
+    el?.focus();
+    if (el && caret && caret[0] !== null) el.setSelectionRange(caret[0], caret[1]);
+  }
 
   const scrollLeft = stage.scrollLeft;
   clear(stage);
@@ -137,7 +146,11 @@ store.subscribe(render);
 ui.subscribe(render);
 window.addEventListener('resize', redrawCables);
 document.fonts?.ready.then(redrawCables);
+document.addEventListener('click', (e) => {
+  if (ui.state.projectOpen && !(e.target as Element).closest?.('.project-menu')) ui.set({ projectOpen: false });
+});
 document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && ui.state.projectOpen) { ui.set({ projectOpen: false }); return; }
   if (e.key === 'Escape') {
     const sel = ui.state.selected;
     ui.set({ pending: null, highlight: new Set(), highlightCables: new Set(), selected: sel?.kind === 'cable' ? null : sel });

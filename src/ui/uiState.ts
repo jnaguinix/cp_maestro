@@ -14,7 +14,9 @@ export const viewSg = (view: View): number | null => (typeof view === 'number' ?
 
 export interface UiState {
   view: View;
-  sideCollapsed: boolean;             // panel lateral plegado para dar más ancho al rack
+  sideCollapsed: boolean;
+  projectOpen: boolean;               // menú Proyecto desplegado
+  importWarnings: string[];           // ajustes hechos al abrir el último proyecto             // panel lateral plegado para dar más ancho al rack
   activeCable: string;
   pending: EndpointId | null;          // primer extremo elegido al cablear
   selected: { kind: 'endpoint'; id: EndpointId } | { kind: 'cable'; id: string } | null;
@@ -30,6 +32,8 @@ export class Ui {
   state: UiState = {
     view: 'all',
     sideCollapsed: false,
+    projectOpen: false,
+    importWarnings: [],
     activeCable: 'dac25',
     pending: null,
     selected: null,

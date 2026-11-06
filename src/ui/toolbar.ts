@@ -3,12 +3,14 @@ import { SCENARIOS, type ScenarioId } from '../model/scenarios';
 import { portUsage } from '../rules/validate';
 import type { Ctx } from './context';
 import { h } from './dom';
+import { renderProjectMenu } from './projectMenu';
 
 export function renderToolbar(ctx: Ctx) {
   const usage = portUsage(ctx.sim);
   const counts = { error: 0, warning: 0 };
   ctx.issues.forEach((i) => { if (i.severity !== 'info') counts[i.severity]++; });
   return h('div', { class: 'toolbar' },
+    renderProjectMenu(ctx),
     h('div', { class: 'tool-group' },
       h('span', { class: 'tool-label' }, 'Cable'),
       h('div', { class: 'cable-chips', role: 'radiogroup', 'aria-label': 'Tipo de cable' },
