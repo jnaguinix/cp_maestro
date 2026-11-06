@@ -34,4 +34,24 @@ describe('Store: agregar y quitar appliances', () => {
     store.toggleSgUplink(1, '1/5/1');
     expect(store.get().sgs[0].uplinkPorts).toEqual([]);
   });
+
+  it('al salir del breakout se quitan los cables y uplinks de los sub-puertos que desaparecen', () => {
+    const store = new Store(buildScenario('empty'));
+    store.setPortMode(1, 49, '4x25G');
+    store.connect('app:a1:c1', 'mho:1/49/1', 'bo25');
+    store.connect('app:a1:c3', 'mho:1/49/3', 'bo25');
+    store.toggleSgUplink(1, '1/49/1');
+    store.toggleSgUplink(1, '1/49/3');
+    store.setPortMode(1, 49, '100G');
+    const s = store.get();
+    expect(s.cables.map((c) => c.b)).toEqual(['mho:1/49/1']);        // el del sub-puerto 1 se conserva
+    expect(s.sgs[0].uplinkPorts).toEqual(['1/49/1']);
+  });
+
+  it('cambiar la velocidad de un puerto sin breakout no toca los cables', () => {
+    const store = new Store(buildScenario('ok'));
+    const before = store.get().cables.length;
+    store.setPortMode(1, 27, '10G');
+    expect(store.get().cables.length).toBe(before);
+  });
 });

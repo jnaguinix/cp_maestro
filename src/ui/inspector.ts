@@ -87,8 +87,17 @@ function mhoInspector(ctx: Ctx, ep: EndpointId) {
   const modeSel = h('select', {
     id: 'insp-mode', disabled: def.allowedModes.length === 1,
     onchange: (e: Event) => {
+      const before = ctx.sim.cables.length;
       const err = ctx.store.setPortMode(p.orch, p.front, (e.target as HTMLSelectElement).value as PortMode);
-      if (err) ctx.ui.toast(err);
+      if (err) { ctx.ui.toast(err); return; }
+      const removed = before - ctx.store.get().cables.length;
+      if (p.sub > 1 && !isSplitMode(ctx.store.get().ports[portKey(p.orch, p.front)].mode)) {
+        // el sub-puerto seleccionado ya no existe: se vuelve al puerto base
+        ctx.ui.set({ selected: { kind: 'endpoint', id: `mho:${portIdStr(p.orch, p.front, 1)}` } });
+      }
+      if (removed > 0) {
+        ctx.ui.toast(`Se quitó${removed > 1 ? 'ron' : ''} ${removed} cable${removed > 1 ? 's' : ''} de los sub-puertos que ya no existen.`);
+      }
     },
   }, def.allowedModes.map((m) => h('option', { value: m, selected: m === cfg.mode }, m)));
 

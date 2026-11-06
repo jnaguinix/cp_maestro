@@ -1,6 +1,6 @@
 // Estado de la aplicación con suscriptores. Las acciones devuelven un mensaje si se rechazan.
 import { cableSpec } from '../data/appliances';
-import { portDef, portKey } from '../data/mho140';
+import { isSplitMode, portDef, portKey } from '../data/mho140';
 import { parseEndpoint } from './endpoints';
 import { buildScenario, type ScenarioId } from './scenarios';
 import type { Appliance, EndpointId, OrchId, PortMode, PortType, SimState } from './types';
@@ -86,7 +86,26 @@ export class Store {
     const def = portDef(front);
     if (!def.allowedModes.includes(mode)) return `El puerto ${front} no admite ${mode}.`;
     const key = portKey(o, front);
-    this.commit({ ...this.state, ports: { ...this.state.ports, [key]: { ...this.state.ports[key], mode } } });
+    const wasSplit = isSplitMode(this.state.ports[key].mode);
+    let next: SimState = { ...this.state, ports: { ...this.state.ports, [key]: { ...this.state.ports[key], mode } } };
+    // Al salir del breakout desaparecen los sub-puertos 2-4: se quitan sus cables y las
+    // asignaciones de Uplink a esos sub-puertos, que si no quedarían ocultos en el rack.
+    if (wasSplit && !isSplitMode(mode)) {
+      const isGone = (id: string) => {
+        const [po, pf, ps] = id.replace(/^mho:/, '').split('/').map(Number);
+        return po === o && pf === front && ps > 1;
+      };
+      next = {
+        ...next,
+        cables: next.cables.filter((c) => !(c.a.startsWith('mho:') && isGone(c.a)) && !(c.b.startsWith('mho:') && isGone(c.b))),
+        sgs: next.sgs.map((sg) => ({
+          ...sg,
+          uplinkPorts: sg.uplinkPorts.filter((p) => !isGone(p)),
+          mgmtPorts: sg.mgmtPorts.filter((p) => !isGone(p)),
+        })),
+      };
+    }
+    this.commit(next);
     return null;
   }
 
