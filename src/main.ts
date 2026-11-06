@@ -7,7 +7,7 @@ import { Store } from './model/store';
 import type { EndpointId, Issue } from './model/types';
 import { validate } from './rules/validate';
 import { drawCables } from './ui/cables';
-import { renderCatalog, renderViewTabs } from './ui/catalog';
+import { renderRackBar } from './ui/catalog';
 import type { Ctx } from './ui/context';
 import { clear, h, svg } from './ui/dom';
 import { renderRack } from './ui/rack';
@@ -24,7 +24,6 @@ const toolbarHost = document.getElementById('toolbar')!;
 const stage = document.getElementById('stage')!;
 const workspace = document.querySelector<HTMLElement>('.workspace')!;
 const viewTabsHost = document.getElementById('view-tabs')!;
-const catalogHost = document.getElementById('catalog')!;
 const sideTabs = document.getElementById('side-tabs')!;
 const sideBody = document.getElementById('side-body')!;
 const toastHost = document.getElementById('toast')!;
@@ -124,9 +123,7 @@ function render() {
   // Alto disponible para el rack (lo usa el CSS del modo compacto)
   document.documentElement.style.setProperty('--stage-top', `${Math.round(stage.getBoundingClientRect().top + window.scrollY)}px`);
   clear(viewTabsHost);
-  viewTabsHost.appendChild(renderViewTabs(ctx));
-  clear(catalogHost);
-  catalogHost.appendChild(renderCatalog(ctx));
+  viewTabsHost.appendChild(renderRackBar(ctx));
   stage.scrollLeft = scrollLeft;
   stage.scrollTop = scrollTop;
   stage.classList.toggle('is-pending', !!ui.state.pending);
@@ -181,11 +178,20 @@ window.addEventListener('resize', () => {
   resizeTimer = window.setTimeout(render, 80);
 });
 document.fonts?.ready.then(redrawCables);
+// Los menús desplegables (proyecto, cable, agregar) se cierran al hacer clic fuera
 document.addEventListener('click', (e) => {
-  if (ui.state.projectOpen && !(e.target as Element).closest?.('.project-menu')) ui.set({ projectOpen: false });
+  const t = e.target as Element;
+  const patch: Partial<typeof ui.state> = {};
+  if (ui.state.projectOpen && !t.closest?.('.project-menu')) { patch.projectOpen = false; patch.confirmOpen = null; }
+  if (ui.state.cableOpen && !t.closest?.('.cable-picker')) patch.cableOpen = false;
+  if (ui.state.addOpen && !t.closest?.('.add-equip')) patch.addOpen = false;
+  if (Object.keys(patch).length) ui.set(patch);
 });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && ui.state.projectOpen) { ui.set({ projectOpen: false }); return; }
+  if (e.key === 'Escape' && (ui.state.projectOpen || ui.state.cableOpen || ui.state.addOpen)) {
+    ui.set({ projectOpen: false, cableOpen: false, addOpen: false, confirmOpen: null });
+    return;
+  }
   if (e.key === 'Escape') {
     const sel = ui.state.selected;
     ui.set({ pending: null, highlight: new Set(), highlightCables: new Set(), selected: sel?.kind === 'cable' ? null : sel, drawer: false });

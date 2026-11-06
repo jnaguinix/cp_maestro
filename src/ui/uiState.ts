@@ -17,6 +17,9 @@ export interface UiState {
   view: View;
   sideCollapsed: boolean;
   projectOpen: boolean;
+  confirmOpen: { what: string; run: () => void } | null; // confirmación de reemplazar la topología
+  cableOpen: boolean;                 // menú del selector de cable
+  addOpen: boolean;                   // menú "+ Firewall" (pantallas angostas)
   drawer: boolean;                    // modo compacto: panel lateral abierto encima del rack
   zoomPref: ZoomPref;                 // escala del rack: 'fit' o un número fijo               // menú Proyecto desplegado
   importWarnings: string[];           // ajustes hechos al abrir el último proyecto             // panel lateral plegado para dar más ancho al rack
@@ -36,6 +39,9 @@ export class Ui {
     view: 'all',
     sideCollapsed: false,
     projectOpen: false,
+    confirmOpen: null,
+    cableOpen: false,
+    addOpen: false,
     drawer: false,
     zoomPref: loadZoomPref(),
     importWarnings: [],

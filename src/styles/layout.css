@@ -25,9 +25,8 @@ body {
 .app-header {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px 24px;
+  align-items: center;
+  gap: 10px 14px;
 }
 
 .brand h1 {
@@ -40,11 +39,6 @@ body {
   text-wrap: balance;
 }
 
-.brand p {
-  margin: 2px 0 0;
-  color: var(--muted);
-  font-size: 0.85rem;
-}
 
 #toolbar {
   flex: 1 1 640px;
@@ -114,7 +108,6 @@ body {
   .app { gap: 8px; padding-block: 10px 12px; }
   .app-header { gap: 8px 16px; align-items: center; }
   .brand h1 { font-size: 1.3rem; }
-  .brand p { font-size: 0.74rem; }
   #toolbar { flex: 1 1 auto; }
 
   .workspace,
@@ -154,10 +147,6 @@ body {
   .side-close:hover { color: var(--fg); }
 
   /* Pestañas de SG y catálogo comparten fila cuando caben */
-  .stage-wrap { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-  #view-tabs { flex: 1 1 auto; min-width: 0; }
-  #catalog { flex: 0 1 auto; min-width: 0; }
-  .stage-wrap > .stage, .stage-wrap > .legend { flex-basis: 100%; }
 
   /* El rack ocupa el alto que queda en la pantalla */
   .stage {

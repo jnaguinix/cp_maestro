@@ -1,9 +1,10 @@
 // Menú "Proyecto": datos del proyecto, guardar/abrir .maestro.json, foto PNG y plan de cableado CSV.
 import { cablePlanCsv } from '../model/cablePlan';
+import { SCENARIOS, type ScenarioId } from '../model/scenarios';
 import { FILE_EXTENSION, exportProject, fileBaseName, importProject } from '../model/projectFile';
 import type { ProjectInfo } from '../model/types';
 import type { Ctx } from './context';
-import { h } from './dom';
+import { h, svg } from './dom';
 import { rackToPng } from './exportImage';
 
 function download(name: string, data: Blob) {
@@ -31,13 +32,43 @@ async function openFile(ctx: Ctx, file: File) {
     return;
   }
   const name = result.state.project?.name || file.name;
+  const { state, warnings } = result;
+  askReplace(ctx, `el proyecto «${name}»`, () => {
+    ctx.store.replaceState(state);
+    ctx.ui.set({ selected: null, pending: null, highlight: new Set(), highlightCables: new Set(), view: 'all', importWarnings: warnings, projectOpen: warnings.length > 0, confirmOpen: null });
+    ctx.ui.toast(warnings.length
+      ? `Proyecto abierto con ${warnings.length} ajuste(s): revisa la lista en el menú Proyecto.`
+      : `Proyecto «${name}» abierto.`);
+  });
+}
+
+/** Si hay trabajo en el rack, pide confirmación dentro del menú antes de reemplazarlo.
+ *  (No se usa window.confirm: algunos navegadores integrados bloquean esos diálogos y
+ *  responden "Cancelar" sin mostrarlos.) */
+function askReplace(ctx: Ctx, what: string, run: () => void) {
   const hasWork = ctx.sim.cables.length > 0 || ctx.sim.appliances.length > 0;
-  if (hasWork && !window.confirm(`¿Abrir "${name}"?\n\nSe reemplaza la topología actual. Si quieres conservarla, guárdala antes con "Guardar proyecto".`)) return;
-  ctx.store.replaceState(result.state);
-  ctx.ui.set({ selected: null, pending: null, highlight: new Set(), highlightCables: new Set(), view: 'all', importWarnings: result.warnings, projectOpen: result.warnings.length > 0 });
-  ctx.ui.toast(result.warnings.length
-    ? `Proyecto abierto con ${result.warnings.length} ajuste(s): revisa la lista en el menú Proyecto.`
-    : `Proyecto "${name}" abierto.`);
+  if (!hasWork) { run(); return; }
+  ctx.ui.set({ projectOpen: true, confirmOpen: { what, run } });
+}
+
+/** Carga un escenario de ejemplo (pide confirmación si hay trabajo en el rack). */
+function openExample(ctx: Ctx, id: ScenarioId) {
+  const s = SCENARIOS.find((x) => x.id === id)!;
+  askReplace(ctx, `el ejemplo «${s.label}»`, () => {
+    ctx.store.loadScenario(id);
+    ctx.ui.set({
+      selected: null, pending: null, highlight: new Set(), highlightCables: new Set(), view: 'all',
+      tab: id === 'broken' ? 'issues' : 'inspector', drawer: id === 'broken', projectOpen: false, confirmOpen: null,
+    });
+    ctx.ui.toast(`Ejemplo «${s.label}» abierto.`);
+  });
+}
+
+/** Icono de carpeta (sin depender de una fuente de iconos) */
+function folderIcon() {
+  const s = svg('svg', { width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' });
+  s.appendChild(svg('path', { d: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z' }));
+  return s;
 }
 
 function field(ctx: Ctx, key: keyof ProjectInfo, label: string, placeholder: string, multiline = false) {
@@ -70,9 +101,17 @@ export function renderProjectMenu(ctx: Ctx) {
   return h('div', { class: `project-menu ${open ? 'open' : ''}` },
     h('button', {
       type: 'button', class: 'proj-toggle', 'aria-expanded': String(open), 'aria-controls': 'proj-panel',
-      onclick: () => ctx.ui.set({ projectOpen: !open }),
-    }, h('span', { class: 'proj-name' }, ctx.sim.project?.name || 'Proyecto sin nombre'), ' ▾'),
+      title: 'Proyecto: datos, guardar, abrir, ejemplos y exportar',
+      onclick: () => ctx.ui.set({ projectOpen: !open, cableOpen: false, addOpen: false, confirmOpen: null }),
+    }, folderIcon(), h('span', { class: 'proj-name' }, ctx.sim.project?.name || 'Proyecto sin nombre'), ' ▾'),
     open ? h('div', { class: 'proj-panel', id: 'proj-panel', role: 'dialog', 'aria-label': 'Proyecto' },
+      ctx.ui.state.confirmOpen
+        ? h('div', { class: 'proj-confirm', role: 'alertdialog', 'aria-label': 'Confirmar' },
+          h('p', {}, h('strong', {}, `¿Abrir ${ctx.ui.state.confirmOpen.what}?`), ' Se reemplaza la topología actual (cables y equipos). Si quieres conservarla, guárdala antes con «Guardar proyecto».'),
+          h('div', { class: 'proj-confirm-actions' },
+            h('button', { type: 'button', class: 'btn primary', onclick: () => ctx.ui.state.confirmOpen?.run() }, 'Abrir y reemplazar'),
+            h('button', { type: 'button', class: 'btn', onclick: () => ctx.ui.set({ confirmOpen: null }) }, 'Cancelar')))
+        : null,
       h('div', { class: 'proj-fields' },
         field(ctx, 'name', 'Proyecto', 'p. ej. Core DC principal'),
         field(ctx, 'client', 'Cliente', 'p. ej. ACME S.A.'),
@@ -116,6 +155,8 @@ export function renderProjectMenu(ctx: Ctx) {
             ctx.ui.toast('Plan de cableado descargado (CSV para Excel).');
           },
         }, 'Exportar plan de cableado (CSV)'),
+        h('span', { class: 'tool-label' }, 'Abrir un ejemplo'),
+        SCENARIOS.map((s) => h('button', { type: 'button', class: 'btn', title: s.hint, onclick: () => openExample(ctx, s.id) }, s.label)),
       ),
       warnings.length
         ? h('details', { class: 'explain proj-warnings', open: true },

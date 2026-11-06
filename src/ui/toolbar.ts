@@ -1,5 +1,4 @@
-import { CABLES } from '../data/appliances';
-import { SCENARIOS, type ScenarioId } from '../model/scenarios';
+// Cabecera: a la izquierda el proyecto (junto al título de la app) y a la derecha su estado.
 import { portUsage } from '../rules/validate';
 import type { Ctx } from './context';
 import { h } from './dom';
@@ -9,42 +8,21 @@ export function renderToolbar(ctx: Ctx) {
   const usage = portUsage(ctx.sim);
   const counts = { error: 0, warning: 0 };
   ctx.issues.forEach((i) => { if (i.severity !== 'info') counts[i.severity]++; });
+  const free = (o: 1 | 2) => `${usage[o].downlinkFree}/${usage[o].downlinkTotal}`;
   return h('div', { class: 'toolbar' },
-    renderProjectMenu(ctx),
-    h('div', { class: 'tool-group' },
-      h('span', { class: 'tool-label' }, 'Cable'),
-      h('div', { class: 'cable-chips', role: 'radiogroup', 'aria-label': 'Tipo de cable' },
-        CABLES.map((c) => h('button', {
-          type: 'button', role: 'radio', 'aria-checked': String(ctx.ui.state.activeCable === c.id),
-          class: `cable-chip k-${c.kind} ${ctx.ui.state.activeCable === c.id ? 'on' : ''}`,
-          onclick: () => ctx.ui.set({ activeCable: c.id }),
-        }, c.label))),
-      // En pantallas angostas los botones de cable se cambian por este selector (ver CSS)
-      h('select', {
-        class: 'cable-select', 'aria-label': 'Tipo de cable',
-        onchange: (e: Event) => ctx.ui.set({ activeCable: (e.target as HTMLSelectElement).value }),
-      }, CABLES.map((c) => h('option', { value: c.id, selected: ctx.ui.state.activeCable === c.id }, c.label))),
+    h('div', { class: 'crumb' },
+      h('span', { class: 'crumb-sep', 'aria-hidden': 'true' }, '/'),
+      renderProjectMenu(ctx),
+      h('span', { class: 'crumb-sub' }, '2× MHO-140 · Quantum Force · R82'),
     ),
-    h('div', { class: 'tool-group' },
-      h('label', { class: 'tool-label', for: 'scenario' }, 'Escenario'),
-      h('select', {
-        id: 'scenario',
-        onchange: (e: Event) => {
-          const v = (e.target as HTMLSelectElement).value as ScenarioId;
-          if (!v) return;
-          ctx.store.loadScenario(v);
-          ctx.ui.set({ selected: null, pending: null, highlight: new Set(), highlightCables: new Set(), tab: v === 'broken' ? 'issues' : 'inspector' });
-          (e.target as HTMLSelectElement).value = '';
-        },
-      }, h('option', { value: '' }, 'Cargar…'), SCENARIOS.map((s) => h('option', { value: s.id, title: s.hint }, s.label))),
-    ),
-    h('div', { class: 'tool-group stats' },
-      h('span', { class: 'stat' }, h('b', {}, `${usage[1].downlinkFree}/${usage[1].downlinkTotal}`), ' downlinks libres MHO1'),
-      h('span', { class: 'stat' }, h('b', {}, `${usage[2].downlinkFree}/${usage[2].downlinkTotal}`), ' MHO2'),
+    h('div', { class: 'status' },
+      h('span', { class: 'stat', title: `Downlinks libres: ${free(1)} en el MHO1 y ${free(2)} en el MHO2` },
+        'Downlinks libres ', h('b', {}, `${free(1)} · ${free(2)}`)),
       h('button', {
         type: 'button', class: `stat-btn ${counts.error ? 'bad' : counts.warning ? 'meh' : 'good'}`,
+        title: 'Ver la validación',
         onclick: () => ctx.ui.set({ tab: 'issues', drawer: true }),
-      }, counts.error ? `${counts.error} errores` : counts.warning ? `${counts.warning} avisos` : 'Todo correcto'),
+      }, counts.error ? `${counts.error} errores` : counts.warning ? `${counts.warning} avisos` : '✓ Todo correcto'),
     ),
   );
 }
