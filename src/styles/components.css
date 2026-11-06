@@ -388,13 +388,19 @@ select {
 .lg-note { flex-basis: 100%; }
 
 /* ---------- Panel lateral ---------- */
-.tabs { display: flex; border-bottom: 1px solid var(--line); overflow-x: auto; }
+/* Las pestañas siempre caben: sin scroll horizontal (su barra tapaba media pestaña y
+   los clics caían en la barra en vez de en la pestaña). Si falta espacio, se encogen. */
+.tabs { display: flex; flex: none; border-bottom: 1px solid var(--line); overflow: hidden; }
 .tab {
-  flex: 1 0 auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   background: none;
   border: 0;
   border-bottom: 2px solid transparent;
-  padding: 10px 12px;
+  padding: 10px 8px;
   font-weight: 500;
   font-size: 0.85rem;
   color: var(--muted);

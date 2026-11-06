@@ -132,7 +132,7 @@ function render() {
   const errCount = issues.filter((i) => i.severity === 'error').length;
   clear(sideTabs);
   sideTabs.append(...TABS.map((t) => h('button', {
-    type: 'button', role: 'tab', 'aria-selected': String(ui.state.tab === t.id),
+    type: 'button', role: 'tab', 'aria-selected': String(ui.state.tab === t.id), title: t.label,
     class: `tab ${ui.state.tab === t.id ? 'on' : ''}`, onclick: () => ui.set({ tab: t.id }),
   }, t.label, t.id === 'issues' && errCount ? h('span', { class: 'badge' }, errCount) : null)),
   // Solo se ve en modo compacto, donde el panel es un cajón
