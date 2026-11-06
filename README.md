@@ -1,6 +1,6 @@
 # Maestro Port Lab
 
-Simulador de puertos y cableado para Check Point Maestro: 2× MHO-140 en un mismo site, 8 appliances Quantum Force (9100, 9200, 9400 y 9800, dos de cada uno) y dos switches externos (management y producción). Modo R82.
+Simulador de puertos y cableado para Check Point Maestro: 2× MHO-140 en un mismo site, 8 appliances Quantum Force (9100, 9200, 9400 y 9800, dos de cada uno) y un switch del cliente con una zona de management (puertos 1-8) y otra de producción (9-24). Modo R82.
 
 Conectas y desconectas cables, cambias el tipo y la velocidad de los puertos, asignas appliances y puertos Management a los Security Groups, y el validador explica qué está mal y en qué documento se apoya cada regla.
 

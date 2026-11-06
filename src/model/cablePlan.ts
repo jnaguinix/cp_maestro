@@ -1,7 +1,7 @@
 // Plan de cableado: una fila por cable, pensado para imprimirlo y cablear el rack real.
 // Se exporta como CSV con ";" (Excel en español usa la coma como separador decimal) y BOM UTF-8
 // para que los acentos se vean bien al abrirlo.
-import { APPLIANCE_MODELS, cableSpec, cardPortNumber } from '../data/appliances';
+import { APPLIANCE_MODELS, SWITCH_UNIT_NAME, SWITCH_ZONE_LABEL, cableSpec, cardPortNumber, switchPortNumber } from '../data/appliances';
 import { TYPE_LABEL, gaiaName, portIdStr, portKey } from '../data/mho140';
 import { parseEndpoint } from './endpoints';
 import type { SimState } from './types';
@@ -42,7 +42,8 @@ function endLabel(state: SimState, ep: string): { device: string; port: string; 
     };
   }
   const sw = state.switches.find((s) => s.id === p.swId);
-  return { device: sw?.name ?? p.swId, port: String(p.n), sg: null, order: `0-${p.swId}` };
+  const num = switchPortNumber(state.switches, p.swId, p.n);
+  return { device: SWITCH_UNIT_NAME, port: `${num}${sw ? ` (${SWITCH_ZONE_LABEL[sw.role]})` : ''}`, sg: null, order: `0-${String(num).padStart(3, '0')}` };
 }
 
 const isSplit = (state: SimState, o: 1 | 2, front: number) => {

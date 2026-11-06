@@ -1,5 +1,5 @@
 // Panel lateral: detalle del puerto o cable seleccionado.
-import { APPLIANCE_MODELS, CABLES, ROLE_LABEL, cableSpec, cardPortNumber, expectedOrchForCardPort } from '../data/appliances';
+import { APPLIANCE_MODELS, CABLES, ROLE_LABEL, SWITCH_UNIT_NAME, SWITCH_ZONE_LABEL, cableSpec, cardPortNumber, expectedOrchForCardPort, switchPortLabel, switchPortNumber } from '../data/appliances';
 import {
   TYPE_HELP, TYPE_LABEL, gaiaName, isSplitMode, portDef, portIdStr, portKey,
 } from '../data/mho140';
@@ -45,8 +45,7 @@ export function describeEndpoint(ctx: Ctx, ep: EndpointId): string {
     const port = app && APPLIANCE_MODELS[app.model].ports.find((x) => x.id === p.portId);
     return `${app?.name ?? p.appId} · ${port?.label ?? p.portId}`;
   }
-  const sw = ctx.sim.switches.find((s) => s.id === p.swId);
-  return `${sw?.name ?? p.swId} · puerto ${p.n}`;
+  return switchPortLabel(ctx.sim.switches, p.swId, p.n);
 }
 
 function kv(k: string, v: Node | string) {
@@ -169,11 +168,12 @@ function swInspector(ctx: Ctx, ep: EndpointId) {
   const sw = ctx.sim.switches.find((s) => s.id === p.swId)!;
   const cable = ctx.sim.cables.find((c) => c.a === ep || c.b === ep);
   return h('div', { class: 'insp' },
-    h('p', { class: 'eyebrow' }, sw.name),
-    h('h2', {}, `Puerto ${p.n}`),
+    h('p', { class: 'eyebrow' }, `${SWITCH_UNIT_NAME} · zona ${SWITCH_ZONE_LABEL[sw.role]}`),
+    h('h2', {}, `Puerto ${switchPortNumber(ctx.sim.switches, p.swId, p.n)}`),
     h('p', { class: 'help' }, sw.role === 'mgmt'
-      ? 'Red de management: aquí vive el SMS/MDS. Se conecta a los puertos Management (1-4) de cada Orchestrator. El SG obtiene en ese puerto su IP de management (y una MAC propia si el puerto es compartido).'
-      : 'Red de producción del cliente. Se conecta a los Uplinks del Orchestrator; los bonds y las VLANs de esos Uplinks se configuran después en el Gaia del Security Group.'),
+      ? 'Zona de management: aquí vive el SMS/MDS. Se conecta a los puertos Management (1-4) de cada Orchestrator. El SG obtiene en ese puerto su IP de management (y una MAC propia si el puerto es compartido).'
+      : 'Zona de producción del cliente. Se conecta a los Uplinks del Orchestrator; los bonds y las VLANs de esos Uplinks se configuran después en el Gaia del Security Group.'),
+    h('p', { class: 'note' }, 'Es un solo switch físico con dos zonas. En una red real, la de management va en su propia VLAN o segmento, separada de la producción.'),
     h('h3', {}, 'Cable'), cableBlock(ctx, cable, ep),
     h('h3', {}, 'Validación'), issuesFor(ctx, (i) => i.refs.includes(ep) || (!!cable && !!i.cables?.includes(cable.id))),
   );

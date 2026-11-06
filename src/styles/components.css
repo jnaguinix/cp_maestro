@@ -597,3 +597,12 @@ button.issue { cursor: pointer; }
 }
 .proj-warnings { grid-column: 1 / -1; font-size: 0.8rem; max-height: 180px; overflow: auto; }
 @media (max-width: 640px) { .proj-panel { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- Switch del cliente: una unidad con zona Management y zona Producción ---------- */
+.sw-zones { display: flex; align-items: flex-end; gap: 22px; flex: none; }
+.sw-zone { display: flex; flex-direction: column; gap: 4px; }
+.sw-zone + .sw-zone { padding-left: 22px; border-left: 1px solid rgb(255 255 255 / 0.1); }
+.sw-zone.z-mgmt .glabel { color: var(--t-mgmt); border-bottom-color: color-mix(in srgb, var(--t-mgmt) 45%, transparent); }
+.sw-zone.z-data .glabel { color: var(--t-up); border-bottom-color: color-mix(in srgb, var(--t-up) 45%, transparent); }
+.switch .sw-ports { gap: 4px; }
+.switch .sport { width: 30px; height: 24px; min-width: 0; padding: 0; border-radius: 4px; }

@@ -1,5 +1,5 @@
 // Estado de la aplicación con suscriptores. Las acciones devuelven un mensaje si se rechazan.
-import { cableSpec } from '../data/appliances';
+import { DEFAULT_SWITCHES, cableSpec } from '../data/appliances';
 import { isSplitMode, portDef, portKey } from '../data/mho140';
 import { parseEndpoint } from './endpoints';
 import { emptyProject } from './projectFile';
@@ -45,6 +45,8 @@ export class Store {
       if (parsed.version !== 2) return null;
       // Estados guardados antes de que existieran los uplinks por SG
       parsed.sgs = parsed.sgs.map((sg) => ({ ...sg, uplinkPorts: sg.uplinkPorts ?? [] }));
+      // Los switches son fijos: se toman siempre del catálogo (nombres actualizados)
+      parsed.switches = DEFAULT_SWITCHES.map((s) => ({ ...s }));
       return parsed;
     } catch {
       return null;

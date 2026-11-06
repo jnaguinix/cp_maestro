@@ -74,7 +74,30 @@ export const cableSpec = (id: string): CableSpec => {
   return c;
 };
 
+// Un solo switch físico del cliente con dos zonas (VLANs): management y producción.
+// En el modelo siguen siendo dos grupos lógicos (mgmtsw / datasw), así los extremos de cable,
+// las reglas del validador y los proyectos guardados no cambian; solo se dibujan como un equipo.
+export const SWITCH_UNIT_NAME = 'Switch del cliente';
+
 export const DEFAULT_SWITCHES: SwitchDev[] = [
-  { id: 'mgmtsw', name: 'Switch de management (hacia SMS)', role: 'mgmt', ports: 8, speeds: [1, 10] },
-  { id: 'datasw', name: 'Switch del cliente (producción)', role: 'data', ports: 16, speeds: [10, 25, 40, 100] },
+  { id: 'mgmtsw', name: 'Switch del cliente · zona Management', role: 'mgmt', ports: 8, speeds: [1, 10] },
+  { id: 'datasw', name: 'Switch del cliente · zona Producción', role: 'data', ports: 16, speeds: [10, 25, 40, 100] },
 ];
+
+export const SWITCH_ZONE_LABEL: Record<SwitchDev['role'], string> = { mgmt: 'Management', data: 'Producción' };
+
+/** Número de puerto en el switch físico: la zona Management va primero (1-8) y luego Producción (9-24). */
+export function switchPortNumber(switches: SwitchDev[], swId: string, n: number): number {
+  let offset = 0;
+  for (const s of switches) {
+    if (s.id === swId) return offset + n;
+    offset += s.ports;
+  }
+  return n;
+}
+
+/** Texto corto de un puerto del switch: "Switch del cliente · puerto 12 (Producción)" */
+export function switchPortLabel(switches: SwitchDev[], swId: string, n: number): string {
+  const sw = switches.find((s) => s.id === swId);
+  return `${SWITCH_UNIT_NAME} · puerto ${switchPortNumber(switches, swId, n)}${sw ? ` (${SWITCH_ZONE_LABEL[sw.role]})` : ''}`;
+}

@@ -1,6 +1,6 @@
 // Motor de validación. Función pura: recibe el estado y devuelve la lista de hallazgos.
 // Cada regla cita su fuente. Lo que no está documentado se marca [INF].
-import { APPLIANCE_MODELS, cableSpec, cardPortNumber, expectedOrchForCardPort } from '../data/appliances';
+import { APPLIANCE_MODELS, cableSpec, cardPortNumber, expectedOrchForCardPort, switchPortLabel } from '../data/appliances';
 import { gaiaName, isSplitMode, modeSpeed, portDef, portIdStr, portKey } from '../data/mho140';
 import { parseEndpoint, type ParsedEndpoint } from '../model/endpoints';
 import type { Appliance, Cable, Issue, OrchId, Severity, SimState } from '../model/types';
@@ -192,7 +192,7 @@ export function validate(state: SimState): Issue[] {
       if (!sw.speeds.includes(spec.speed)) {
         add({
           rule: 'SW-SPEED', severity: 'error',
-          title: `${sw.name}: no admite ${spec.speed}G`,
+          title: `${switchPortLabel(state.switches, other.swId, other.n)}: no admite ${spec.speed}G`,
           detail: `Este switch del simulador trabaja a ${sw.speeds.join('/')}G.`,
           source: 'Simulador', refs: [swRef], cables: [c.id],
         });
@@ -389,7 +389,7 @@ export function validate(state: SimState): Issue[] {
           add({
             rule: 'SG-MGMT-NOCABLE', severity: 'warning',
             title: `SG${sg.id}: el puerto Management ${p} no llega a la red de management`,
-            detail: 'El puerto está asignado al SG pero no tiene un cable hacia el switch de management, así que el SMS no alcanzará al SMO.',
+            detail: 'El puerto está asignado al SG pero no tiene un cable hacia la zona Management del switch del cliente, así que el SMS no alcanzará al SMO.',
             source: 'GSG p.128', refs: [`mho:${p}`],
           });
         }
@@ -432,7 +432,7 @@ export function validate(state: SimState): Issue[] {
           add({
             rule: 'SG-UPLINK-NOCABLE', severity: 'warning',
             title: `SG${sg.id}: el Uplink ${p} no llega a la red del cliente`,
-            detail: 'El puerto está asignado al SG pero no tiene un cable hacia el switch del cliente (producción), así que esa interfaz no tendrá enlace.',
+            detail: 'El puerto está asignado al SG pero no tiene un cable hacia la zona Producción del switch del cliente, así que esa interfaz no tendrá enlace.',
             source: 'GSG p.126', refs: [`mho:${p}`],
           });
         }

@@ -1,4 +1,4 @@
-// Rack: cada equipo ocupa 1U. Arriba los switches, luego los dos Orchestrators y debajo
+// Rack: cada equipo ocupa 1U. Arriba el switch del cliente (management + producción), luego los dos Orchestrators y debajo
 // los appliances de la vista actual, agrupados por Security Group. Debajo de cada unidad hay
 // un canal por donde los cables corren en horizontal hasta los organizadores laterales
 // (MHO1 a la izquierda, MHO2 a la derecha). cables.ts ajusta el tamaño de canales y organizadores.
@@ -19,7 +19,7 @@ export function renderRack(ctx: Ctx) {
     .map((x) => x.a);
 
   const units: HTMLElement[] = [
-    ...ctx.sim.switches.map((sw) => renderSwitchUnit(ctx, sw)),
+    renderSwitchUnit(ctx, ctx.sim.switches),
     renderFaceplate(ctx, 1),
     renderFaceplate(ctx, 2),
     ...apps.map((a) => renderApplianceUnit(ctx, a)),

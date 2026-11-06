@@ -60,6 +60,14 @@ describe('plan de cableado', () => {
     expect(sync).toMatchObject({ fromDevice: 'MHO1', toDevice: 'MHO2', gaia: 'SYNC-INT' });
   });
 
+  it('un solo switch del cliente: management 1-8 y producción 9-24', () => {
+    const rows = buildCablePlan(buildScenario('ok'));
+    const mg = rows.find((r) => r.portId === '1/1/1')!;
+    const up = rows.find((r) => r.portId === '1/5/1')!;
+    expect(mg).toMatchObject({ fromDevice: 'Switch del cliente', fromPort: '1 (Management)' });
+    expect(up).toMatchObject({ fromDevice: 'Switch del cliente', fromPort: '9 (Producción)' });
+  });
+
   it('CSV con ";" y BOM, y celdas con comillas escapadas', () => {
     const s = buildScenario('ok');
     s.appliances[0].name = '9100-A; "core"';

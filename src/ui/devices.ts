@@ -1,5 +1,5 @@
 // Appliances (SGMs) y switches externos, dibujados como equipos de rack de 1U.
-import { APPLIANCE_MODELS, ROLE_LABEL, cardPortNumber, expectedOrchForCardPort } from '../data/appliances';
+import { APPLIANCE_MODELS, ROLE_LABEL, SWITCH_UNIT_NAME, SWITCH_ZONE_LABEL, cardPortNumber, expectedOrchForCardPort, switchPortNumber } from '../data/appliances';
 import { appEndpoint, swEndpoint } from '../model/endpoints';
 import type { Appliance, AppliancePortDef, EndpointId, SwitchDev } from '../model/types';
 import type { Ctx } from './context';
@@ -132,22 +132,32 @@ export function renderApplianceUnit(ctx: Ctx, app: Appliance) {
   );
 }
 
-export function renderSwitchUnit(ctx: Ctx, sw: SwitchDev) {
+/** Una zona del switch (Management o Producción): etiqueta y puertos en dos filas, impares arriba. */
+function switchZone(ctx: Ctx, sw: SwitchDev, switches: SwitchDev[]) {
   const ports = Array.from({ length: sw.ports }, (_, i) => {
     const ep = swEndpoint(sw.id, i + 1);
+    const num = switchPortNumber(switches, sw.id, i + 1);
     return h('button', {
       type: 'button', class: epClasses(ctx, ep, `sport sw-${sw.role}`), 'data-ep': ep,
-      title: `${sw.name} · puerto ${i + 1} · ${sw.speeds.join('/')}G`,
-      'aria-label': `${sw.name} puerto ${i + 1}`,
+      title: `${SWITCH_UNIT_NAME} · puerto ${num} · zona ${SWITCH_ZONE_LABEL[sw.role]} · ${sw.speeds.join('/')}G`,
+      'aria-label': `${SWITCH_UNIT_NAME} puerto ${num}, zona ${SWITCH_ZONE_LABEL[sw.role]}`,
       onclick: () => ctx.clickEndpoint(ep),
-    }, String(i + 1));
+    }, String(num));
   });
-  return h('article', { class: `switch sw-${sw.role}`, 'aria-label': sw.name },
-    h('div', { class: 'unit-id' },
-      h('strong', {}, sw.role === 'mgmt' ? 'Switch management' : 'Switch cliente'),
-      h('span', { class: 'unit-sub' }, sw.role === 'mgmt' ? 'Hacia SMS / MDS' : 'Producción · redes del cliente'),
-    ),
+  return h('div', { class: `sw-zone z-${sw.role}` },
+    h('div', { class: 'glabel' }, sw.role === 'mgmt' ? 'MGMT · hacia SMS / MDS' : 'Producción · Uplinks'),
     h('div', { class: 'sw-ports' }, ports),
+  );
+}
+
+/** El switch del cliente: un solo equipo de 1U con la zona de management y la de producción. */
+export function renderSwitchUnit(ctx: Ctx, switches: SwitchDev[]) {
+  return h('article', { class: 'switch', 'aria-label': SWITCH_UNIT_NAME },
+    h('div', { class: 'unit-id' },
+      h('strong', {}, SWITCH_UNIT_NAME),
+      h('span', { class: 'unit-sub' }, 'Dos zonas (VLANs)'),
+    ),
+    h('div', { class: 'sw-zones' }, switches.map((sw) => switchZone(ctx, sw, switches))),
     vents(),
     h('span', { class: 'leds', 'aria-hidden': 'true' }, h('i'), h('i')),
   );
