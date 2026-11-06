@@ -1,0 +1,533 @@
+/* ---------- Color por tipo de puerto ---------- */
+.t-management { --tc: var(--t-mgmt); }
+.t-uplink { --tc: var(--t-up); }
+.t-downlink { --tc: var(--t-dl); }
+.t-ssm_sync { --tc: var(--t-sync); }
+.t-site_sync { --tc: var(--t-site); }
+
+button, select, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code, pre { font-family: var(--font-mono); }
+
+/* ---------- Barra de herramientas ---------- */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  align-items: center;
+  justify-content: flex-end;
+}
+.tool-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.tool-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 600;
+}
+.cable-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.cable-chip {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.cable-chip.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+select {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 4px 8px;
+}
+.stats { gap: 12px; }
+.stat { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.stat b { color: var(--fg); font-family: var(--font-mono); font-weight: 500; }
+.stat-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.stat-btn.bad { background: var(--err-bg); color: var(--err); }
+.stat-btn.meh { background: var(--warn-bg); color: var(--warn); }
+.stat-btn.good { background: var(--ok-bg); color: var(--ok); }
+
+/* ---------- Rack ---------- */
+.sg-1 { --sgc: #5b8c5a; }
+.sg-2 { --sgc: #b06a9c; }
+.sg-3 { --sgc: #4f8fa6; }
+.sg-4 { --sgc: #c09a3a; }
+.sg-none { --sgc: #7b8794; }
+
+/* El rack ocupa todo el ancho; a los lados quedan los organizadores verticales de cables. */
+.rack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 8px var(--mr, 18px) 0 var(--ml, 18px);
+  min-width: calc(1180px + var(--ml, 18px) + var(--mr, 18px));
+}
+.rack.drop-ok { outline: 2px dashed var(--accent); outline-offset: -2px; border-radius: var(--r-md); }
+.mgr {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--r-sm);
+  background: repeating-linear-gradient(180deg, var(--surface-2) 0 9px, transparent 9px 14px);
+  border: 1px dashed var(--line);
+}
+.mgr.l { left: 2px; width: calc(var(--ml, 18px) - 6px); }
+.mgr.r { right: 2px; width: calc(var(--mr, 18px) - 6px); }
+.chan { flex: none; }
+.empty-view { margin: 4px 0 10px; padding: 16px 12px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: var(--r-md); background: var(--surface); }
+
+/* Unidad de 1U: placa oscura opaca (tapa los cables) con orejas de montaje */
+.u {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 58px;
+  padding: 6px 22px;
+  background: linear-gradient(180deg, var(--face-2), var(--face));
+  color: var(--face-fg);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06), var(--shadow);
+}
+.u::before, .u::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  background:
+    radial-gradient(circle at 50% 22%, #0b0f13 0 1.8px, transparent 2.4px),
+    radial-gradient(circle at 50% 78%, #0b0f13 0 1.8px, transparent 2.4px),
+    #4c5662;
+}
+.u::before { left: 0; border-radius: 3px 0 0 3px; }
+.u::after { right: 0; border-radius: 0 3px 3px 0; }
+
+.unit-id { display: flex; flex-direction: column; width: 150px; flex: none; min-width: 0; }
+.unit-id strong { font-family: var(--font-display); font-size: 1.02rem; font-weight: 600; color: #fff; line-height: 1.1; letter-spacing: 0.02em; }
+.unit-sub { font-size: 0.68rem; color: var(--face-muted); }
+.vents {
+  flex: 1;
+  min-width: 16px;
+  align-self: stretch;
+  margin-block: 4px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, rgb(255 255 255 / 0.05) 0 2px, transparent 2px 6px);
+}
+.leds { display: flex; flex-direction: column; gap: 5px; flex: none; }
+.leds i { width: 6px; height: 6px; border-radius: 50%; background: #5cc483; box-shadow: 0 0 4px #5cc483; }
+.leds i + i { background: #e2a84a; box-shadow: none; opacity: 0.7; }
+.card-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--face-muted); display: block; margin-bottom: 3px; white-space: nowrap; }
+.row { display: flex; gap: 3px; }
+
+/* ---------- Orchestrator ---------- */
+.mho { gap: 20px; }
+.mho-head .mho-name { font-size: 1.15rem; letter-spacing: 0.06em; }
+.mho-id { font-family: var(--font-mono); font-size: 0.66rem; color: var(--face-muted); }
+.mho-side { margin-top: 3px; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.04em; color: var(--accent); }
+.face { flex: 1; display: flex; justify-content: space-between; gap: 18px; align-items: flex-end; min-width: 0; }
+.pgroup { display: flex; flex-direction: column; gap: 4px; }
+.glabel {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--face-muted);
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+  padding-bottom: 2px;
+  white-space: nowrap;
+}
+.cols { display: flex; gap: 4px; }
+.col { display: flex; flex-direction: column; gap: 3px; }
+.slot { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.slot .pnum { font-family: var(--font-mono); font-size: 0.58rem; color: var(--face-muted); line-height: 1; font-variant-numeric: tabular-nums; }
+.col .slot:last-child { flex-direction: column-reverse; }
+
+.port {
+  position: relative;
+  z-index: 3;
+  width: 30px;
+  height: 24px;
+  border-radius: 4px;
+  border: 2px solid var(--tc);
+  background: var(--port-empty);
+  cursor: pointer;
+  padding: 0;
+  color: #fff;
+  font-size: 0.66rem;
+  font-family: var(--font-mono);
+}
+.port.qsfp { width: 46px; }
+.port.cabled { background: var(--tc); box-shadow: inset 0 0 0 2px rgb(0 0 0 / 0.35); }
+.port.changed { border-style: dashed; }
+.port.disabled { border-color: #4b5562; background: repeating-linear-gradient(45deg, #2b333d 0 3px, #161b21 3px 6px); cursor: not-allowed; }
+.port.mini { width: 21px; }
+.split { display: grid; grid-template-columns: repeat(4, 21px); gap: 2px; }
+/* Puerto ocupado por un appliance de otro Security Group (cuando se mira un SG concreto) */
+.port.foreign { background: color-mix(in srgb, var(--sgc, #888) 60%, var(--port-empty)); border-color: color-mix(in srgb, var(--tc) 45%, var(--port-empty)); box-shadow: none; opacity: 0.55; }
+.port.foreign:hover { opacity: 0.9; }
+
+.port:hover, .aport:hover, .sport:hover { filter: brightness(1.25); }
+.pending, .port.pending { outline: 3px solid #fff; outline-offset: 2px; animation: pulse 1s ease-in-out infinite; }
+.selected { outline: 3px solid var(--accent); outline-offset: 2px; }
+.hl { outline: 3px dashed #ffd23f; outline-offset: 2px; }
+.port.sev-error, .aport.sev-error, .sport.sev-error { box-shadow: 0 0 0 3px var(--err); }
+.port.sev-warning, .aport.sev-warning, .sport.sev-warning { box-shadow: 0 0 0 3px var(--warn); }
+@keyframes pulse { 50% { outline-color: var(--accent); } }
+
+/* ---------- Switches ---------- */
+.sw-ports { display: grid; grid-auto-flow: column; grid-template-rows: repeat(2, auto); gap: 3px; }
+.aport, .sport {
+  position: relative;
+  z-index: 3;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 4px;
+  border-radius: 3px;
+  border: 2px solid rgb(255 255 255 / 0.18);
+  background: var(--port-empty);
+  color: var(--face-muted);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  cursor: pointer;
+}
+.sport.sw-mgmt { border-color: var(--t-mgmt); }
+.sport.sw-data { border-color: var(--t-up); }
+.sport.cabled { background: var(--tc, var(--face-fg)); color: var(--face); }
+.sport.sw-mgmt.cabled { background: var(--t-mgmt); color: #fff; }
+.sport.sw-data.cabled { background: var(--t-up); color: #fff; }
+
+/* ---------- Appliances (frontal tipo Quantum Force) ---------- */
+.appliance { padding-left: 12px; gap: 14px; min-height: 76px; }
+
+/* Tapa ciega de la izquierda: identificación y controles */
+.fw-blank {
+  align-self: stretch;
+  margin-block: -6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 12px;
+  flex: none;
+  background: linear-gradient(180deg, #2b333d, #20262e);
+  border-right: 1px solid rgb(0 0 0 / 0.5);
+  box-shadow: inset -1px 0 0 rgb(255 255 255 / 0.05);
+}
+.sg-strip {
+  align-self: stretch;
+  width: 34px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: var(--sgc);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+}
+.appliance .unit-id { width: 118px; }
+.app-tools { display: flex; flex-direction: column; align-items: stretch; gap: 4px; flex: none; }
+.sg-pick select {
+  position: relative; z-index: 3; font-size: 0.72rem; padding: 2px 3px; width: 100%;
+  background: var(--port-empty); color: var(--face-fg); border: 1px solid rgb(255 255 255 / 0.18); border-left: 4px solid var(--sgc);
+}
+.app-x {
+  position: relative; z-index: 3; height: 20px; line-height: 1; padding: 0 6px;
+  border: 1px solid rgb(255 255 255 / 0.18); border-radius: 3px; background: transparent; color: var(--face-muted); cursor: pointer; font-size: 0.85rem;
+}
+.app-x:hover { color: #fff; background: var(--err); border-color: var(--err); }
+
+/* Slot de expansión: módulo con tornillos y las 4 jaulas SFP28 */
+.fw-slot {
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 22px 4px;
+  background: #0f1318;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 2px rgb(227 129 47 / 0.25);
+}
+.screw {
+  position: absolute;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  margin-top: -5.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #e9edf1, #8b96a2 60%, #4c5662);
+}
+.screw::after { content: ''; position: absolute; left: 2px; right: 2px; top: 5px; height: 1px; background: #3a434d; }
+.screw.l { left: 5px; }
+.screw.r { right: 5px; }
+.fw-slot-body { display: flex; align-items: center; gap: 8px; }
+.fw-dir { display: flex; flex-direction: column; justify-content: space-around; align-self: stretch; padding-block: 12px; gap: 10px; }
+.fw-dir span { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em; white-space: nowrap; color: var(--face-fg); }
+.fw-dir .to-1 { color: #9ec5ff; }
+.fw-dir .to-2 { color: #ffc49a; }
+.fw-cap { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--face-muted); white-space: nowrap; }
+.fw-slot .fw-cap { color: var(--t-dl); font-weight: 600; }
+
+.fw-group { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: none; }
+.fw-onboard { opacity: 0.7; }
+.fw-onboard:hover { opacity: 1; }
+
+/* Puertos del appliance: mismo lenguaje visual que el MHO */
+.appliance .aport {
+  width: 30px;
+  height: 24px;
+  min-width: 0;
+  padding: 0;
+  border-radius: 3px;
+  border: 2px solid rgb(255 255 255 / 0.3);
+  background: var(--port-empty);
+}
+.appliance .aport.cage.small { width: 26px; height: 20px; }
+.appliance .aport.r-card { border-color: var(--t-dl); }
+.appliance .aport.r-card.cabled { background: var(--sgc, var(--t-dl)); box-shadow: inset 0 0 0 2px rgb(0 0 0 / 0.35); }
+.appliance .aport.cabled { background: var(--face-fg); }
+/* Forma de conector RJ45: muesca abajo */
+.appliance .aport.rj { width: 26px; height: 22px; border-radius: 2px; }
+.appliance .aport.rj::after {
+  content: '';
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  bottom: -2px;
+  height: 6px;
+  background: var(--face);
+  border: 2px solid rgb(255 255 255 / 0.3);
+  border-bottom: 0;
+  border-radius: 1px 1px 0 0;
+}
+.appliance .aport.rj.dashed { border-style: dashed; }
+.appliance .aport.sev-error, .appliance .aport.sev-warning { opacity: 1; }
+.fw-onboard:has(.sev-error), .fw-onboard:has(.sev-warning), .fw-onboard:has(.cabled) { opacity: 1; }
+
+/* Consola, USB, LOM: decorativos */
+.fw-io { display: flex; align-items: flex-end; gap: 10px; flex: none; opacity: 0.6; }
+.deco-port { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 0.52rem; color: var(--face-muted); letter-spacing: 0.04em; }
+.deco-port i { display: block; }
+.deco-port .rj { width: 22px; height: 18px; border: 2px solid #5b6672; border-radius: 2px; background: #0b0e12; }
+.deco-port .usb { width: 20px; height: 7px; border: 2px solid #3d7bd1; border-radius: 1px; background: #0b0e12; }
+.deco-port .usbc { width: 18px; height: 7px; border: 2px solid #5b6672; border-radius: 4px; background: #0b0e12; }
+
+.fw-brand { display: flex; align-items: center; gap: 10px; flex: none; }
+.fw-model { display: flex; flex-direction: column; font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: #fff; line-height: 1; letter-spacing: 0.04em; }
+.fw-model b { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--face-muted); margin-bottom: 2px; }
+
+/* ---------- Pestañas por Security Group y catálogo ---------- */
+.view-tabs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.view-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--line); background: var(--surface); border-radius: 999px;
+  padding: 5px 12px; font-weight: 600; font-size: 0.84rem; cursor: pointer;
+}
+.view-tab .vt-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--sgc, var(--muted)); }
+.view-tab .vt-count { font-family: var(--font-mono); font-weight: 500; font-size: 0.72rem; color: var(--muted); }
+.view-tab.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.view-tab.on .vt-count { color: inherit; opacity: 0.75; }
+.view-tab.drop-ok { outline: 2px dashed var(--accent); outline-offset: 2px; }
+.view-hint { margin-left: auto; font-size: 0.74rem; color: var(--muted); }
+.side-toggle { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-sm); padding: 4px 10px; font-size: 0.78rem; cursor: pointer; }
+
+.catalog { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 6px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); }
+.catalog-head { display: flex; flex-direction: column; gap: 1px; }
+.thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
+.thumb {
+  display: grid; grid-template-columns: auto 1fr; grid-template-areas: 'face name' 'face sub'; column-gap: 8px; align-items: center;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 4px 10px 4px 5px; cursor: grab; text-align: left;
+}
+.thumb:hover { border-color: var(--accent); }
+.thumb:active { cursor: grabbing; }
+.thumb-face { grid-area: face; display: flex; align-items: center; gap: 4px; width: 62px; height: 22px; padding: 0 4px; border-radius: 2px; background: var(--face); border-top: 3px solid #7b8794; }
+.thumb-led { width: 5px; height: 5px; border-radius: 50%; background: #5cc483; flex: none; }
+.thumb-ports { display: flex; gap: 2px; margin-left: auto; }
+.thumb-ports i { width: 7px; height: 8px; border: 1.5px solid var(--t-dl); border-radius: 1px; }
+.thumb-name { grid-area: name; font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; line-height: 1; }
+.thumb-sub { grid-area: sub; font-size: 0.64rem; color: var(--muted); }
+.catalog-count { margin-left: auto; }
+
+/* ---------- Cables ---------- */
+.cable-layer { position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; overflow: visible; }
+.cable .line { fill: none; stroke: var(--tc); stroke-width: 2.5; opacity: 0.95; stroke-linecap: round; stroke-linejoin: round; }
+.cable[class*='sg-'] .line { stroke: var(--sgc); }
+.cable.sg-none .line { stroke: var(--muted); }
+.cable-layer.has-focus .cable:not(.focus):not(.hl) .line { opacity: 0.18; }
+.cable .hit { fill: none; stroke: transparent; stroke-width: 12; pointer-events: stroke; cursor: pointer; }
+.cable.k-fiber .line { stroke-dasharray: 7 4; }
+.cable.k-breakout .line { stroke-dasharray: 2 3; stroke-width: 2; }
+.cable.k-rj45 .line { stroke: var(--muted); }
+.cable.sev-warning .line { stroke: var(--warn); }
+.cable.sev-error .line { stroke: var(--err); stroke-width: 3; }
+.cable:hover .line { stroke-width: 4.5; opacity: 1; }
+/* Sin contorno rectangular: en un <g> de SVG el outline encierra todo el trazado */
+.cable-layer .cable { outline: none; }
+.cable.hl .line { stroke: #ffd23f; stroke-width: 4.5; }
+/* Cable seleccionado (o el del puerto seleccionado): neón de su propio color */
+.cable { --neon: var(--tc); }
+.cable[class*='sg-'] { --neon: var(--sgc); }
+.cable.sg-none, .cable.k-rj45 { --neon: #b8c2cd; }
+.cable.neon .line {
+  stroke: var(--neon);
+  stroke-width: 3.5;
+  opacity: 1;
+  stroke-dasharray: none;
+  filter: brightness(1.35) saturate(1.3) drop-shadow(0 0 2px var(--neon)) drop-shadow(0 0 6px var(--neon)) drop-shadow(0 0 12px var(--neon));
+  animation: neon 1.6s ease-in-out infinite;
+}
+@keyframes neon { 50% { stroke-width: 4.5; } }
+.pending-ring { fill: none; stroke: var(--accent); stroke-width: 2; }
+.stage.is-pending { cursor: crosshair; }
+
+/* ---------- Leyenda ---------- */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; font-size: 0.78rem; color: var(--muted); align-items: center; }
+.lg::before { content: ''; display: inline-block; width: 12px; height: 10px; border-radius: 2px; background: var(--tc); margin-right: 5px; vertical-align: -1px; }
+.lg-note { flex-basis: 100%; }
+
+/* ---------- Panel lateral ---------- */
+.tabs { display: flex; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tab {
+  flex: 1 0 auto;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 10px 12px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+.tab.on { color: var(--fg); border-bottom-color: var(--accent); }
+.badge { margin-left: 6px; background: var(--err); color: #fff; border-radius: 999px; padding: 0 6px; font-size: 0.7rem; font-variant-numeric: tabular-nums; }
+
+.insp { display: flex; flex-direction: column; gap: 10px; }
+.insp h2 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 1.4rem; line-height: 1.1; text-wrap: balance; }
+.insp h3 { margin: 6px 0 0; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+.insp p { margin: 0; }
+.eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+.help { background: var(--surface-2); border-left: 3px solid var(--tc, var(--accent)); padding: 8px 10px; border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+.note { font-size: 0.82rem; color: var(--muted); }
+.muted { color: var(--muted); }
+.ok-line { color: var(--ok); font-size: 0.85rem; }
+.ident { margin: 0; display: grid; gap: 4px; }
+.kv { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.kv dt { color: var(--muted); font-size: 0.8rem; }
+.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.kv code { background: var(--surface-2); padding: 1px 6px; border-radius: 3px; }
+.controls { display: grid; grid-template-columns: 1fr; gap: 4px; }
+.controls label { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-block; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.chip[class*='t-'] { background: var(--tc); color: #fff; }
+.chip.sev-error { background: var(--err-bg); color: var(--err); }
+.chip.sev-warning { background: var(--warn-bg); color: var(--warn); }
+.chip.sev-info { background: var(--info-bg); color: var(--info); }
+.cable-box { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.k { color: var(--muted); font-size: 0.8rem; }
+.linkish { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-align: left; text-decoration: underline; text-underline-offset: 2px; }
+.btn { border: 1px solid var(--line); background: var(--surface-2); border-radius: var(--r-sm); padding: 5px 12px; cursor: pointer; font-weight: 500; align-self: flex-start; }
+.btn.danger { color: var(--err); border-color: var(--err); background: transparent; }
+.cmd {
+  margin: 0;
+  background: var(--face);
+  color: var(--face-fg);
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  font-size: 0.78rem;
+  overflow-x: auto;
+  white-space: pre;
+}
+.cmd.tall { max-height: 60vh; }
+.verdict { font-weight: 600; padding: 8px 10px; border-radius: var(--r-sm); }
+.verdict.bad { background: var(--err-bg); color: var(--err); }
+.verdict.meh { background: var(--warn-bg); color: var(--warn); }
+.verdict.good { background: var(--ok-bg); color: var(--ok); }
+
+.issue-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.issue {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--sevc);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  background: var(--surface);
+}
+button.issue { cursor: pointer; }
+.issue.sev-error { --sevc: var(--err); }
+.issue.sev-warning { --sevc: var(--warn); }
+.issue.sev-info { --sevc: var(--info); }
+.issue p { margin: 0; font-size: 0.84rem; }
+.issue .sev { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: var(--sevc); }
+.issue .src { font-size: 0.72rem; color: var(--muted); font-family: var(--font-mono); }
+.issue-list.compact .issue { padding: 6px 8px; }
+
+.explain { background: var(--surface-2); border-radius: var(--r-sm); padding: 8px 12px; }
+.explain summary { cursor: pointer; font-weight: 600; }
+.explain ul { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 0.86rem; }
+.sg-card { border: 1px solid var(--line); border-top: 4px solid var(--sgc); border-radius: var(--r-sm); padding: 8px 10px; display: flex; flex-direction: column; gap: 8px; }
+.sg-card h3 { margin: 0; font-family: var(--font-display); font-size: 1.1rem; letter-spacing: 0; text-transform: none; color: var(--fg); }
+.mini-table { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
+.mini-table th, .mini-table td { text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--line); }
+.mini-table th { font-weight: 600; color: var(--muted); font-size: 0.72rem; }
+.mini-table .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.mgmt-pick { border: 0; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.mgmt-pick legend { font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; }
+.check { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; }
+.intro ol { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  background: var(--fg);
+  color: var(--bg);
+  padding: 10px 16px;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+  z-index: 20;
+  max-width: min(520px, calc(100vw - 32px));
+}
+
+/* ---------- Puertos conectados a un appliance y brillo neón ---------- */
+/* Un puerto del MHO conectado a un appliance se rellena con el color de su SG, igual que en el firewall */
+.port.cabled.by-sg { background: var(--sgc); }
+.sport.sw-mgmt { --tc: var(--t-mgmt); }
+.sport.sw-data { --tc: var(--t-up); }
+.glow { --neon: var(--tc, #b8c2cd); }
+.port.by-sg.glow, .aport.r-card.glow { --neon: var(--sgc); }
+.fw-onboard:has(.glow) { opacity: 1; }
+/* Extremos del cable seleccionado: brillan con su color base */
+.rack .u .glow.glow.glow {
+  z-index: 4;
+  outline: none;
+  opacity: 1;
+  filter: brightness(1.3) saturate(1.3);
+  box-shadow: 0 0 0 2px var(--neon), 0 0 10px 2px var(--neon), 0 0 20px 5px color-mix(in srgb, var(--neon) 55%, transparent);
+  animation: neon-port 1.6s ease-in-out infinite;
+}
+@keyframes neon-port {
+  50% { box-shadow: 0 0 0 2px var(--neon), 0 0 14px 4px var(--neon), 0 0 28px 8px color-mix(in srgb, var(--neon) 55%, transparent); }
+}
+
+/* El rack es una superficie de trabajo: arrastrar el ratón no debe seleccionar texto */
+.stage, .view-tabs, .catalog, .toolbar { user-select: none; -webkit-user-select: none; }
+.stage select, .stage input { user-select: auto; -webkit-user-select: auto; }

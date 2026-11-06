@@ -1,0 +1,92 @@
+/* Concepto: banco de trabajo de rack. Página clara y neutra con matiz azul acero;
+   los Orchestrators son placas oscuras como el hardware real; el color se reserva
+   para los tipos de puerto (código del GSG: downlink naranja, uplink azul, sync morado). */
+:root {
+  --bg: #eef1f4;
+  --surface: #ffffff;
+  --surface-2: #f5f7f9;
+  --line: #d3dae2;
+  --fg: #17202b;
+  --muted: #5b6878;
+  --accent: #1f6fd1;
+
+  /* placa del Orchestrator (igual en ambos temas) */
+  --face: #1b2129;
+  --face-2: #252d37;
+  --face-fg: #c9d3de;
+  --face-muted: #8494a6;
+  --port-empty: #0e1217;
+
+  /* tipos de puerto */
+  --t-mgmt: #2aa794;
+  --t-up: #3d84dc;
+  --t-dl: #e3812f;
+  --t-sync: #8f63db;
+  --t-site: #a785b8;
+
+  /* severidad */
+  --err: #cf3a3a;
+  --err-bg: #fbeaea;
+  --warn: #b7791f;
+  --warn-bg: #fbf3e2;
+  --info: #4b6a8e;
+  --info-bg: #e9f0f7;
+  --ok: #2f8a4d;
+  --ok-bg: #e7f4ec;
+
+  --font-display: 'Barlow Semi Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  --r-sm: 4px;
+  --r-md: 8px;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 2px 8px rgb(16 24 40 / 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #11161c;
+    --surface: #181e26;
+    --surface-2: #1e252e;
+    --line: #2c3540;
+    --fg: #e3e9ef;
+    --muted: #93a1b1;
+    --accent: #6aa6f2;
+    --face: #0b0f13;
+    --face-2: #151b22;
+    --port-empty: #05080b;
+    --err: #ef6b6b;
+    --err-bg: #3a1f22;
+    --warn: #e2a84a;
+    --warn-bg: #3a2f1b;
+    --info: #8eaed3;
+    --info-bg: #1d2a38;
+    --ok: #5cc483;
+    --ok-bg: #1b3326;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #11161c;
+  --surface: #181e26;
+  --surface-2: #1e252e;
+  --line: #2c3540;
+  --fg: #e3e9ef;
+  --muted: #93a1b1;
+  --accent: #6aa6f2;
+  --face: #0b0f13;
+  --face-2: #151b22;
+  --port-empty: #05080b;
+  --err: #ef6b6b;
+  --err-bg: #3a1f22;
+  --warn: #e2a84a;
+  --warn-bg: #3a2f1b;
+  --info: #8eaed3;
+  --info-bg: #1d2a38;
+  --ok: #5cc483;
+  --ok-bg: #1b3326;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+  color-scheme: dark;
+}

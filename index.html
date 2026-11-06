@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Maestro Port Lab</title>
+    <meta name="claude:viewport-fit-sides" content="cover" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div class="brand">
+          <h1>Maestro Port Lab</h1>
+          <p>2× MHO-140 · Quantum Force 9100 / 9200 / 9400 / 9800 · R82</p>
+        </div>
+        <div id="toolbar"></div>
+      </header>
+      <main class="workspace">
+        <div class="stage-wrap">
+          <div id="view-tabs"></div>
+          <div id="catalog"></div>
+          <div id="stage" class="stage" tabindex="0" aria-label="Rack: Orchestrators, appliances y cables"></div>
+          <p class="legend">
+            <span class="lg t-management">Management</span>
+            <span class="lg t-uplink">Uplink</span>
+            <span class="lg t-downlink">Downlink</span>
+            <span class="lg t-ssm_sync">Sync</span>
+            <span class="lg t-site_sync">Sync Dual Site</span>
+            <span class="lg-note">Puertos 1-48: impares arriba, pares abajo (disposición aproximada). Un borde punteado indica un puerto con tipo o velocidad cambiados. Los cables de cada appliance usan el color de su Security Group.</span>
+          </p>
+        </div>
+        <aside class="side">
+          <nav id="side-tabs" class="tabs" role="tablist" aria-label="Paneles"></nav>
+          <div id="side-body" class="side-body"></div>
+        </aside>
+      </main>
+      <div id="toast" class="toast" role="status" hidden></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
